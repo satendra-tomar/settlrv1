@@ -1,0 +1,40 @@
+/* =============================================================================
+   Settlr Admin — Global CSS
+   Tailwind v4 entry point with custom design tokens via @theme.
+   All tokens map to classes: bg-violet, text-ink, border-violet-border, etc.
+   ============================================================================= */
+
+@import "tailwindcss";
+
+@theme {
+  /* Violet palette */
+  --color-violet: #8B5CF6;
+  --color-violet-light: #A78BFA;
+  --color-violet-border: #E9D5FF;
+  --color-violet-surface: #FAF8FF;
+
+  /* Semantic colors */
+  --color-ink: #1F2937;
+  --color-muted: #6B7280;
+  --color-verified: #22C55E;
+  --color-star: #F59E0B;
+  --color-whatsapp: #25D366;
+
+  /* Dark gradient stops */
+  --color-dark-top: #2A1B44;
+  --color-dark-bottom: #12091C;
+}
+
+/* Base reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-violet-surface);
+  color: var(--color-ink);
+}
