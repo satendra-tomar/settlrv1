@@ -17,8 +17,7 @@ export function useReviews() {
           body,
           is_approved,
           created_at,
-          listings(name),
-          profiles(full_name)
+          listings(name)
         `,
         )
         .order('created_at', { ascending: false })
