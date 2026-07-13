@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Settlr",
+    "slug": "settlr",
+    "scheme": "settlr",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#2A1B44",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.settlr.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#2A1B44",
+        "foregroundImage": "./assets/icon.png"
+      },
+      "package": "com.settlr.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Allow Settlr to use Face ID."
+        }
+      ],
+      "expo-image"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
