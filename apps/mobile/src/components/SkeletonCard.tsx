@@ -10,12 +10,12 @@ export function SkeletonCard() {
       Animated.sequence([
         Animated.timing(opacity, {
           toValue: 1.0,
-          duration: 700,
+          duration: 800,
           useNativeDriver: true,
         }),
         Animated.timing(opacity, {
-          toValue: 0.4,
-          duration: 700,
+          toValue: 0.5,
+          duration: 800,
           useNativeDriver: true,
         }),
       ]),
@@ -47,16 +47,18 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     overflow: 'hidden',
     marginBottom: spacing.md,
-    shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
   image: {
     width: '100%',
-    height: 160,
-    backgroundColor: colors.border,
+    height: 180,
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   content: {
     padding: spacing.md,
@@ -64,7 +66,7 @@ const styles = StyleSheet.create({
   },
   line: {
     height: 14,
-    backgroundColor: colors.border,
+    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: radius.sm,
   },
   lineLong: {

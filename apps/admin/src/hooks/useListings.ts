@@ -8,6 +8,8 @@ export interface ListingFilters {
   type?: Enums<'listing_type'>
   is_verified?: boolean
   plan_tier?: Enums<'plan_tier'>
+  status?: 'published' | 'draft' | 'archived'
+  sort?: 'newest' | 'oldest' | 'rating'
   search?: string
   page?: number
 }
@@ -23,8 +25,14 @@ export type ListingRow = Pick<
   | 'is_active'
   | 'rating'
   | 'review_count'
+  | 'review_count'
   | 'created_at'
->
+  | 'updated_at'
+  | 'address'
+  | 'phone'
+> & {
+  listing_images?: { url: string; is_primary: boolean }[]
+}
 
 const PAGE_SIZE = 25
 
@@ -32,23 +40,39 @@ export function useListings(filters: ListingFilters = {}) {
   return useQuery({
     queryKey: ['listings', filters],
     queryFn: async () => {
-      const { page = 1, type, is_verified, plan_tier, search } = filters
+      const { page = 1, type, is_verified, plan_tier, status, sort, search } = filters
       const from = (page - 1) * PAGE_SIZE
       const to = from + PAGE_SIZE - 1
 
       let query = supabase
         .from('listings')
         .select(
-          'id, type, name, area, plan_tier, is_verified, is_active, rating, review_count, created_at',
+          `id, type, name, area, address, phone, plan_tier, is_verified, is_active, rating, review_count, created_at, updated_at,
+           listing_images(url, is_primary)`,
           { count: 'exact' },
         )
-        .order('created_at', { ascending: false })
         .range(from, to)
 
+      // Sorting
+      if (sort === 'oldest') {
+        query = query.order('created_at', { ascending: true })
+      } else if (sort === 'rating') {
+        query = query.order('rating', { ascending: false }).order('created_at', { ascending: false })
+      } else {
+        query = query.order('created_at', { ascending: false }) // Default newest
+      }
+
+      // Filtering
       if (type) query = query.eq('type', type)
       if (is_verified !== undefined) query = query.eq('is_verified', is_verified)
       if (plan_tier) query = query.eq('plan_tier', plan_tier)
-      if (search) query = query.ilike('name', `%${search}%`)
+      if (status === 'published') query = query.eq('is_active', true)
+      if (status === 'draft') query = query.eq('is_active', false)
+      // 'archived' not implemented at DB level yet, just ignoring for now
+      
+      if (search) {
+        query = query.or(`name.ilike.%${search}%,area.ilike.%${search}%`)
+      }
 
       const { data, error, count } = await query
 
@@ -198,6 +222,55 @@ export function useToggleVerified(id: string, currentValue: boolean) {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['listings'] })
+    },
+  })
+}
+
+type BulkActionType = 'publish' | 'unpublish' | 'verify' | 'unverify' | 'delete'
+
+export function useBulkUpdateListings() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ ids, action }: { ids: string[]; action: BulkActionType }) => {
+      if (ids.length === 0) return
+
+      if (action === 'delete') {
+        const { error } = await supabase.from('listings').delete().in('id', ids)
+        if (error) throw error
+        return
+      }
+
+      let updatePayload = {}
+      if (action === 'publish') updatePayload = { is_active: true }
+      if (action === 'unpublish') updatePayload = { is_active: false }
+      if (action === 'verify') updatePayload = { is_verified: true }
+      if (action === 'unverify') updatePayload = { is_verified: false }
+
+      const { error } = await supabase
+        .from('listings')
+        .update(updatePayload)
+        .in('id', ids)
+      
+      if (error) throw error
+    },
+    onSuccess: (_, { action }) => {
+      queryClient.invalidateQueries({ queryKey: ['listings'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard-pending-count'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard-coaching-count'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard-hostel-count'] })
+      
+      const actionMsg = {
+        publish: 'Listings published',
+        unpublish: 'Listings unpublished',
+        verify: 'Listings verified',
+        unverify: 'Listings unverified',
+        delete: 'Listings deleted',
+      }
+      toast.success(actionMsg[action])
+    },
+    onError: (err: Error) => {
+      toast.error(`Bulk action failed: ${err.message}`)
     },
   })
 }

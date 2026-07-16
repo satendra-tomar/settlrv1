@@ -38,12 +38,12 @@ export function Layout() {
     (location.pathname.endsWith('/edit') ? 'Edit Listing' : 'Admin')
 
   return (
-    <div className="flex h-screen overflow-hidden bg-violet-surface">
+    <div className="flex h-screen overflow-hidden bg-surface-darker">
       {/* Sidebar */}
-      <aside className="w-60 flex flex-col bg-white border-r border-violet-border shadow-sm">
+      <aside className="w-64 flex flex-col bg-white border-r border-border-subtle shadow-sm z-10">
         {/* Logo */}
-        <div className="px-6 py-5 border-b border-violet-border">
-          <span className="text-xl font-bold text-violet">Settlr Admin</span>
+        <div className="px-6 py-6 border-b border-border-subtle">
+          <span className="text-xl font-bold text-brand tracking-tight">Settlr Admin</span>
         </div>
 
         {/* Navigation */}
@@ -55,10 +55,10 @@ export function Layout() {
               end={to === '/'}
               className={({ isActive }) =>
                 [
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-violet text-white'
-                    : 'text-ink hover:bg-violet-surface hover:text-violet',
+                    ? 'bg-brand/10 text-brand'
+                    : 'text-text-secondary hover:bg-surface-dark hover:text-ink',
                 ].join(' ')
               }
             >
@@ -69,10 +69,10 @@ export function Layout() {
         </nav>
 
         {/* Sign out */}
-        <div className="px-3 py-4 border-t border-violet-border">
+        <div className="px-3 py-4 border-t border-border-subtle">
           <button
             onClick={signOut}
-            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-muted hover:text-ink hover:bg-violet-surface transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-text-secondary hover:text-danger hover:bg-danger/10 transition-colors"
           >
             <LogOut size={18} />
             Sign Out
@@ -81,10 +81,10 @@ export function Layout() {
       </aside>
 
       {/* Main area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden relative">
         {/* Top bar */}
-        <header className="bg-white border-b border-violet-border px-8 py-4">
-          <h1 className="text-lg font-semibold text-ink">{pageTitle}</h1>
+        <header className="bg-white/80 backdrop-blur-md border-b border-border-subtle px-8 py-5 sticky top-0 z-20">
+          <h1 className="text-xl font-semibold text-ink">{pageTitle}</h1>
         </header>
 
         {/* Page content */}

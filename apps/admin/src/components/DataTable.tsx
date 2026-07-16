@@ -22,7 +22,7 @@ function SkeletonRows({ cols, rows = 5 }: { cols: number; rows?: number }) {
         <tr key={ri}>
           {Array.from({ length: cols }).map((_, ci) => (
             <td key={ci} className="px-4 py-3">
-              <div className="h-4 bg-violet-border rounded animate-pulse" />
+              <div className="h-4 bg-surface-darker rounded animate-shimmer" />
             </td>
           ))}
         </tr>
@@ -39,10 +39,10 @@ export function DataTable<T>({
   rowKey,
 }: DataTableProps<T>) {
   return (
-    <div className="w-full overflow-x-auto rounded-xl border border-violet-border bg-white shadow-sm">
+    <div className="w-full overflow-x-auto rounded-xl border border-border-subtle bg-white shadow-sm">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-violet-surface border-b border-violet-border">
+          <tr className="bg-surface-dark border-b border-border-subtle">
             {columns.map((col) => (
               <th
                 key={col.key}
@@ -56,7 +56,7 @@ export function DataTable<T>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-violet-border">
+        <tbody className="divide-y divide-border-subtle">
           {loading ? (
             <SkeletonRows cols={columns.length} />
           ) : data.length === 0 ? (
@@ -72,7 +72,7 @@ export function DataTable<T>({
             data.map((row) => (
               <tr
                 key={rowKey(row)}
-                className="hover:bg-violet-surface transition-colors"
+                className="hover:bg-surface-dark transition-colors group"
               >
                 {columns.map((col) => (
                   <td

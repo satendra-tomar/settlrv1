@@ -20,6 +20,18 @@ export const colors = {
   background: '#F9FAFB',
   cardBackground: '#FFFFFF',
   border: '#E5E7EB',
+  // ── Detail screen dark palette ──
+  dark: '#0F0B18',
+  darkCard: '#1A1425',
+  darkBorder: '#2D2540',
+  darkMuted: '#9CA3AF',
+  darkText: '#F3F0FF',
+  // ── Accent colors ──
+  gold: '#F59E0B',
+  emerald: '#10B981',
+  rose: '#F43F5E',
+  amber: '#F97316',
+  blue: '#3B82F6',
 } as const
 
 export const radius = {

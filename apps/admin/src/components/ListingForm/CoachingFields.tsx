@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import type { ListingFormData } from './schema'
+import { StringArrayInput } from './StringArrayInput'
 
 const PRESET_EXAM_TYPES = ['NEET', 'JEE', 'UPSC', 'Banking', 'SSC', 'Other']
 
@@ -124,29 +125,79 @@ export function CoachingFields() {
       </div>
 
       {/* Founded Year */}
-      <div>
-        <label className="block text-sm font-medium text-ink mb-1">Founded Year</label>
-        <input
-          type="number"
-          placeholder="e.g. 2010"
-          className="w-48 px-3 py-2 border border-violet-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet"
-          {...register('founded_year', {
-            setValueAs: (v: string) => (v === '' ? undefined : Number(v)),
-          })}
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-ink mb-1">Founded Year</label>
+          <input
+            type="number"
+            placeholder="e.g. 2010"
+            className="w-full px-3 py-2 border border-violet-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet"
+            {...register('founded_year', {
+              setValueAs: (v: string) => (v === '' ? undefined : Number(v)),
+            })}
+          />
+        </div>
+
+        {/* Faculty Count */}
+        <div>
+          <label className="block text-sm font-medium text-ink mb-1">Faculty Count</label>
+          <input
+            type="number"
+            placeholder="e.g. 15"
+            className="w-full px-3 py-2 border border-violet-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet"
+            {...register('faculty_count', {
+              setValueAs: (v: string) => (v === '' ? undefined : Number(v)),
+            })}
+          />
+        </div>
+        
+        {/* Fee Per Month */}
+        <div>
+          <label className="block text-sm font-medium text-ink mb-1">Fee Per Month (₹)</label>
+          <input
+            type="number"
+            placeholder="e.g. 5000"
+            className="w-full px-3 py-2 border border-violet-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet"
+            {...register('fee_per_month', {
+              setValueAs: (v: string) => (v === '' ? undefined : Number(v)),
+            })}
+          />
+        </div>
       </div>
 
-      {/* Faculty Count */}
-      <div>
-        <label className="block text-sm font-medium text-ink mb-1">Faculty Count</label>
-        <input
-          type="number"
-          placeholder="e.g. 15"
-          className="w-48 px-3 py-2 border border-violet-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet"
-          {...register('faculty_count', {
-            setValueAs: (v: string) => (v === '' ? undefined : Number(v)),
-          })}
-        />
+      <hr className="border-t border-violet-border" />
+
+      <h3 className="font-semibold text-ink">Pros & Cons</h3>
+      <StringArrayInput name="pros" label="Pros" placeholder="Add a pro..." />
+      <StringArrayInput name="cons" label="Cons" placeholder="Add a con..." />
+
+      <hr className="border-t border-violet-border" />
+
+      <h3 className="font-semibold text-ink">Experience Scores (0.0 to 10.0)</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+        {[
+          { key: 'teaching_score', label: 'Teaching' },
+          { key: 'notes_score', label: 'Notes' },
+          { key: 'test_series_score', label: 'Test Series' },
+          { key: 'doubt_support_score', label: 'Doubt Support' },
+          { key: 'competition_score', label: 'Competition' },
+          { key: 'personal_attention_score', label: 'Personal Attention' },
+        ].map((score) => (
+          <div key={score.key}>
+            <label className="block text-sm font-medium text-ink mb-1">{score.label}</label>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="10"
+              placeholder="0.0"
+              className="w-full px-3 py-2 border border-violet-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet"
+              {...register(score.key as any, {
+                setValueAs: (v: string) => (v === '' ? undefined : Number(v)),
+              })}
+            />
+          </div>
+        ))}
       </div>
     </div>
   )

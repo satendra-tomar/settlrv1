@@ -66,6 +66,14 @@ export type Database = {
           faculty_count: number | null
           has_demo_class: boolean
           has_online_classes: boolean
+          pros: string[] | null
+          cons: string[] | null
+          teaching_score: number | null
+          notes_score: number | null
+          test_series_score: number | null
+          doubt_support_score: number | null
+          competition_score: number | null
+          personal_attention_score: number | null
         }
         Insert: {
           listing_id: string
@@ -78,6 +86,14 @@ export type Database = {
           faculty_count?: number | null
           has_demo_class?: boolean
           has_online_classes?: boolean
+          pros?: string[] | null
+          cons?: string[] | null
+          teaching_score?: number | null
+          notes_score?: number | null
+          test_series_score?: number | null
+          doubt_support_score?: number | null
+          competition_score?: number | null
+          personal_attention_score?: number | null
         }
         Update: {
           listing_id?: string
@@ -90,6 +106,14 @@ export type Database = {
           faculty_count?: number | null
           has_demo_class?: boolean
           has_online_classes?: boolean
+          pros?: string[] | null
+          cons?: string[] | null
+          teaching_score?: number | null
+          notes_score?: number | null
+          test_series_score?: number | null
+          doubt_support_score?: number | null
+          competition_score?: number | null
+          personal_attention_score?: number | null
         }
         Relationships: [
           {
@@ -144,6 +168,15 @@ export type Database = {
           food_included: boolean
           warden_name: string | null
           warden_phone: string | null
+          room_types: string[] | null
+          pros: string[] | null
+          cons: string[] | null
+          cleanliness_score: number | null
+          food_quality_score: number | null
+          safety_score: number | null
+          study_environment_score: number | null
+          warden_support_score: number | null
+          location_score: number | null
         }
         Insert: {
           listing_id: string
@@ -154,6 +187,15 @@ export type Database = {
           food_included?: boolean
           warden_name?: string | null
           warden_phone?: string | null
+          room_types?: string[] | null
+          pros?: string[] | null
+          cons?: string[] | null
+          cleanliness_score?: number | null
+          food_quality_score?: number | null
+          safety_score?: number | null
+          study_environment_score?: number | null
+          warden_support_score?: number | null
+          location_score?: number | null
         }
         Update: {
           listing_id?: string
@@ -164,6 +206,15 @@ export type Database = {
           food_included?: boolean
           warden_name?: string | null
           warden_phone?: string | null
+          room_types?: string[] | null
+          pros?: string[] | null
+          cons?: string[] | null
+          cleanliness_score?: number | null
+          food_quality_score?: number | null
+          safety_score?: number | null
+          study_environment_score?: number | null
+          warden_support_score?: number | null
+          location_score?: number | null
         }
         Relationships: [
           {

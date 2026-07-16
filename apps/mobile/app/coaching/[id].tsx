@@ -1,27 +1,25 @@
 import React, { useState } from 'react'
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
   SafeAreaView,
 } from 'react-native'
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router'
+import * as Linking from 'expo-linking'
 import { useListingDetail } from '../../src/hooks/useListingDetail'
 import { useReviews, useMyReview } from '../../src/hooks/useReviews'
 import { useIsFavorited, useToggleFavorite } from '../../src/hooks/useFavorites'
 import { useAuth } from '../../src/hooks/useAuth'
 import { recordLead } from '../../src/lib/leads'
-import { ImageGallery } from '../../src/components/ImageGallery'
-import { RatingStars } from '../../src/components/RatingStars'
-import { ActionBar } from '../../src/components/ActionBar'
-import { AmenityGrid } from '../../src/components/AmenityGrid'
-import { ReviewItem } from '../../src/components/ReviewItem'
 import { EmptyState } from '../../src/components/EmptyState'
+import { DetailSkeleton } from '../../src/components/detail/DetailSkeleton'
 import { AuthPromptModal } from '../../src/components/AuthPromptModal'
-import { colors, spacing, fontSize, radius } from '../../src/lib/tokens'
+import { ListingDetailLayout } from '../../src/components/detail/ListingDetailLayout'
+import { colors } from '../../src/lib/tokens'
+import {
+  COACHING_SUMMARY,
+  COACHING_BEST_FOR,
+} from '../../src/lib/placeholders'
 import type { ReviewItem as ReviewItemType } from '../../src/hooks/useReviews'
 
 export default function CoachingDetailScreen() {
@@ -72,20 +70,36 @@ export default function CoachingDetailScreen() {
     router.push(`/review/write/${id}`)
   }
 
+  async function handleCall() {
+    if (!listing?.phone) return
+    recordLead(id, 'call')
+    await Linking.openURL(`tel:${listing.phone}`)
+  }
+
+  async function handleWhatsApp() {
+    if (!listing?.whatsapp) return
+    recordLead(id, 'whatsapp')
+    const number = listing.whatsapp.replace(/[^0-9]/g, '')
+    await Linking.openURL(`https://wa.me/${number}`)
+  }
+
+  async function handleWebsite() {
+    if (!listing?.website_url) return
+    recordLead(id, 'website')
+    await Linking.openURL(listing.website_url)
+  }
+
   const isFavorited = Boolean(favRow)
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safe}>
-        <ActivityIndicator
-          color={colors.violet}
-          size="large"
-          style={{ flex: 1 }}
-        />
+        <DetailSkeleton />
       </SafeAreaView>
     )
   }
 
+  // ── Error ──
   if (error || !listing) {
     return (
       <SafeAreaView style={styles.safe}>
@@ -98,130 +112,69 @@ export default function CoachingDetailScreen() {
     )
   }
 
+  // ── Derive coaching-specific data ──
   const cd = listing.coaching_details?.[0]
+  const subjects = cd?.subjects ?? []
+
+  const quickTags = subjects.slice(0, 4)
+
+  const quickFacts: { emoji: string; label: string; value: string }[] = []
+  if (cd?.established_year) quickFacts.push({ emoji: '🏛️', label: 'Est.', value: String(cd.established_year) })
+  if (cd?.faculty_count) quickFacts.push({ emoji: '👩‍🏫', label: 'Faculty', value: String(cd.faculty_count) })
+  if (cd?.has_demo_class) quickFacts.push({ emoji: '✅', label: 'Demo', value: 'Available' })
+  if (cd?.has_online_classes) quickFacts.push({ emoji: '💻', label: 'Online', value: 'Available' })
+
+  const amenities = (listing.listing_amenities ?? [])
+    .filter((la) => la.amenities != null)
+    .map((la) => ({ name: la.amenities!.name, icon: la.amenities!.icon }))
+
+  const experienceScores: { label: string; score: number; emoji: string }[] = []
+  if (cd?.teaching_score != null) experienceScores.push({ label: 'Teaching', score: cd.teaching_score, emoji: '📚' })
+  if (cd?.notes_score != null) experienceScores.push({ label: 'Notes', score: cd.notes_score, emoji: '📝' })
+  if (cd?.test_series_score != null) experienceScores.push({ label: 'Test Series', score: cd.test_series_score, emoji: '📊' })
+  if (cd?.doubt_support_score != null) experienceScores.push({ label: 'Doubt Support', score: cd.doubt_support_score, emoji: '🙋' })
+  if (cd?.competition_score != null) experienceScores.push({ label: 'Competition', score: cd.competition_score, emoji: '🏆' })
+  if (cd?.personal_attention_score != null) experienceScores.push({ label: 'Personal Attention', score: cd.personal_attention_score, emoji: '🎯' })
+
+  const pros = (cd?.pros ?? []).map(text => ({ text }))
+  const cons = (cd?.cons ?? []).map(text => ({ text }))
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Stack.Screen
-        options={{
-          title: listing.name,
-          headerRight: () => (
-            <TouchableOpacity onPress={handleFavorite} style={styles.heartButton}>
-              <Text style={{ fontSize: 22 }}>{isFavorited ? '❤️' : '🤍'}</Text>
-            </TouchableOpacity>
-          ),
-        }}
+      <Stack.Screen options={{ headerShown: false }} />
+
+      <ListingDetailLayout
+        name={listing.name}
+        type="coaching"
+        images={listing.listing_images ?? []}
+        area={listing.area}
+        rating={listing.rating}
+        reviewCount={listing.review_count}
+        isVerified={listing.is_verified}
+        settlrScore={null}
+        summary={listing.description ?? COACHING_SUMMARY}
+        bestFor={subjects.length > 0 ? subjects : COACHING_BEST_FOR}
+        experienceScores={experienceScores.length > 0 ? experienceScores : undefined}
+        pros={pros.length > 0 ? pros : undefined}
+        cons={cons.length > 0 ? cons : undefined}
+        nearbyPlaces={[]}
+        quickTags={quickTags}
+        quickFacts={quickFacts}
+        feePerMonth={cd?.fee_per_month ?? null}
+        amenities={amenities}
+        reviews={(reviews ?? []) as ReviewItemType[]}
+        hasMyReview={Boolean(myReview)}
+        isFavorited={isFavorited}
+        phone={listing.phone}
+        whatsapp={listing.whatsapp}
+        website={listing.website_url}
+        isPaid={listing.plan_tier === 'paid'}
+        onFavoritePress={handleFavorite}
+        onCallPress={listing.phone ? handleCall : undefined}
+        onWhatsAppPress={listing.whatsapp ? handleWhatsApp : undefined}
+        onWebsitePress={listing.website_url ? handleWebsite : undefined}
+        onWriteReviewPress={handleWriteReview}
       />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* 1. Gallery */}
-        <ImageGallery images={listing.listing_images ?? []} />
-
-        {/* 2. Header */}
-        <View style={styles.section}>
-          <View style={styles.headerRow}>
-            <Text style={styles.name}>{listing.name}</Text>
-            {listing.is_verified && (
-              <View style={styles.verifiedBadge}>
-                <Text style={styles.verifiedText}>✓ Verified</Text>
-              </View>
-            )}
-          </View>
-          {listing.area ? (
-            <Text style={styles.area}>📍 {listing.area}</Text>
-          ) : null}
-          <RatingStars rating={listing.rating} count={listing.review_count} size="md" />
-        </View>
-
-        {/* 3. Coaching facts */}
-        {cd && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Details</Text>
-            {cd.subjects && cd.subjects.length > 0 && (
-              <View style={styles.chipRow}>
-                {cd.subjects.map((s) => (
-                  <View key={s} style={styles.chip}>
-                    <Text style={styles.chipText}>{s}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-            <View style={styles.factsRow}>
-              {cd.established_year ? (
-                <Text style={styles.fact}>🏛️ Est. {cd.established_year}</Text>
-              ) : null}
-              {cd.faculty_count ? (
-                <Text style={styles.fact}>👩‍🏫 {cd.faculty_count} Faculty</Text>
-              ) : null}
-              {cd.has_demo_class ? (
-                <Text style={styles.fact}>✅ Demo class available</Text>
-              ) : null}
-              {cd.has_online_classes ? (
-                <Text style={styles.fact}>💻 Online classes</Text>
-              ) : null}
-            </View>
-          </View>
-        )}
-
-        {/* 4. Description */}
-        {listing.description ? (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About</Text>
-            <Text style={styles.description}>{listing.description}</Text>
-          </View>
-        ) : null}
-
-        {/* 5. Amenities */}
-        {listing.listing_amenities && listing.listing_amenities.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Amenities</Text>
-            <AmenityGrid
-              amenities={listing.listing_amenities
-                .filter((la) => la.amenities != null)
-                .map((la) => ({
-                  name: la.amenities!.name,
-                  icon: la.amenities!.icon,
-                }))}
-            />
-          </View>
-        )}
-
-        {/* 6. Action bar */}
-        <View style={styles.section}>
-          <ActionBar
-            listingId={id}
-            phone={listing.phone}
-            whatsapp={listing.whatsapp}
-            website={listing.website_url}
-            planTier={listing.plan_tier}
-          />
-        </View>
-
-        {/* 7. Reviews */}
-        <View style={styles.section}>
-          <View style={styles.reviewsHeader}>
-            <Text style={styles.sectionTitle}>Reviews</Text>
-            <TouchableOpacity onPress={handleWriteReview} activeOpacity={0.8}>
-              <Text style={styles.writeReviewLink}>
-                {myReview ? '✏️ Edit your review' : '+ Write a review'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {!reviews || reviews.length === 0 ? (
-            <EmptyState
-              title="No reviews yet"
-              subtitle="Be the first to share your experience!"
-              action={{ label: 'Write a Review', onPress: handleWriteReview }}
-            />
-          ) : (
-            reviews.map((review: ReviewItemType) => (
-              <ReviewItem key={review.id} review={review as any} />
-            ))
-          )}
-        </View>
-
-        <View style={{ height: spacing.xl }} />
-      </ScrollView>
 
       <AuthPromptModal
         visible={showAuthModal}
@@ -236,90 +189,6 @@ export default function CoachingDetailScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.white,
-  },
-  heartButton: {
-    padding: spacing.sm,
-  },
-  section: {
-    padding: spacing.md,
-    paddingBottom: 0,
-    marginBottom: spacing.md,
-  },
-  sectionTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.ink,
-    marginBottom: spacing.sm,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  name: {
-    flex: 1,
-    fontSize: fontSize.xl,
-    fontWeight: '800',
-    color: colors.ink,
-  },
-  verifiedBadge: {
-    backgroundColor: colors.verified,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-    marginTop: 3,
-  },
-  verifiedText: {
-    fontSize: fontSize.xs,
-    color: colors.white,
-    fontWeight: '700',
-  },
-  area: {
-    fontSize: fontSize.md,
-    color: colors.muted,
-    marginBottom: spacing.sm,
-  },
-  chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  chip: {
-    backgroundColor: colors.violet,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-  },
-  chipText: {
-    fontSize: fontSize.sm,
-    color: colors.white,
-    fontWeight: '700',
-  },
-  factsRow: {
-    gap: spacing.sm,
-  },
-  fact: {
-    fontSize: fontSize.sm,
-    color: colors.ink,
-  },
-  description: {
-    fontSize: fontSize.md,
-    color: colors.muted,
-    lineHeight: 24,
-  },
-  reviewsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  writeReviewLink: {
-    fontSize: fontSize.sm,
-    color: colors.violet,
-    fontWeight: '600',
+    backgroundColor: colors.dark,
   },
 })

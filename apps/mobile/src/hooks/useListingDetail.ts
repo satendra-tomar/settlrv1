@@ -37,6 +37,15 @@ export type ListingDetail = {
     faculty_count: number | null
     has_demo_class: boolean
     has_online_classes: boolean
+    fee_per_month: number | null
+    pros: string[] | null
+    cons: string[] | null
+    teaching_score: number | null
+    notes_score: number | null
+    test_series_score: number | null
+    doubt_support_score: number | null
+    competition_score: number | null
+    personal_attention_score: number | null
   }[] | null
   hostel_details: {
     gender: Enums<'hostel_gender'>
@@ -46,6 +55,15 @@ export type ListingDetail = {
     food_included: boolean
     warden_name: string | null
     warden_phone: string | null
+    room_types: string[] | null
+    pros: string[] | null
+    cons: string[] | null
+    cleanliness_score: number | null
+    food_quality_score: number | null
+    safety_score: number | null
+    study_environment_score: number | null
+    warden_support_score: number | null
+    location_score: number | null
   }[] | null
 }
 
@@ -55,8 +73,8 @@ export function useListingDetail(id: string, type: Enums<'listing_type'>) {
     queryFn: async () => {
       const detailJoin =
         type === 'coaching'
-          ? 'coaching_details(subjects, established_year, faculty_count, has_demo_class, has_online_classes)'
-          : 'hostel_details(gender, total_rooms, rent_min, rent_max, food_included, warden_name, warden_phone)'
+          ? 'coaching_details(subjects, established_year, faculty_count, has_demo_class, has_online_classes, fee_per_month, pros, cons, teaching_score, notes_score, test_series_score, doubt_support_score, competition_score, personal_attention_score)'
+          : 'hostel_details(gender, total_rooms, rent_min, rent_max, food_included, warden_name, warden_phone, room_types, pros, cons, cleanliness_score, food_quality_score, safety_score, study_environment_score, warden_support_score, location_score)'
 
       const { data, error } = await supabase
         .from('listings')

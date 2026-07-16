@@ -11,7 +11,7 @@ export default function SplashScreen() {
   async function navigate() {
     const onboarded = await AsyncStorage.getItem('onboarded')
     if (onboarded) {
-      router.replace('/(tabs)/')
+      router.replace('/(tabs)')
     } else {
       router.replace('/(auth)/onboarding')
     }

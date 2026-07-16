@@ -18,6 +18,8 @@ const commonFields = {
   is_verified: z.boolean(),
   plan_tier: z.enum(['free', 'paid']),
   amenity_ids: z.array(z.string().uuid()),
+  pros: z.array(z.string()),
+  cons: z.array(z.string()),
 }
 
 const coachingSchema = z.object({
@@ -37,6 +39,18 @@ const coachingSchema = z.object({
     .min(1)
     .optional()
     .or(z.nan().transform(() => undefined)),
+  fee_per_month: z
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .or(z.nan().transform(() => undefined)),
+  teaching_score: z.number().min(0).max(10).optional().or(z.nan().transform(() => undefined)),
+  notes_score: z.number().min(0).max(10).optional().or(z.nan().transform(() => undefined)),
+  test_series_score: z.number().min(0).max(10).optional().or(z.nan().transform(() => undefined)),
+  doubt_support_score: z.number().min(0).max(10).optional().or(z.nan().transform(() => undefined)),
+  competition_score: z.number().min(0).max(10).optional().or(z.nan().transform(() => undefined)),
+  personal_attention_score: z.number().min(0).max(10).optional().or(z.nan().transform(() => undefined)),
 })
 
 const hostelSchema = z
@@ -48,6 +62,12 @@ const hostelSchema = z
     rent_max: z.number().int().min(0),
     room_types: z.array(z.string()),
     food_included: z.boolean(),
+    cleanliness_score: z.number().min(0).max(10).optional().or(z.nan().transform(() => undefined)),
+    food_quality_score: z.number().min(0).max(10).optional().or(z.nan().transform(() => undefined)),
+    safety_score: z.number().min(0).max(10).optional().or(z.nan().transform(() => undefined)),
+    study_environment_score: z.number().min(0).max(10).optional().or(z.nan().transform(() => undefined)),
+    warden_support_score: z.number().min(0).max(10).optional().or(z.nan().transform(() => undefined)),
+    location_score: z.number().min(0).max(10).optional().or(z.nan().transform(() => undefined)),
   })
   .refine((data) => data.rent_max >= data.rent_min, {
     message: 'Maximum rent must be ≥ minimum rent',

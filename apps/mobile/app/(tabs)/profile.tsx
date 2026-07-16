@@ -72,7 +72,7 @@ export default function ProfileScreen() {
           style={styles.signOutButton}
           onPress={async () => {
             await signOut()
-            router.replace('/(tabs)/')
+            router.replace('/(tabs)')
           }}
           activeOpacity={0.85}
         >

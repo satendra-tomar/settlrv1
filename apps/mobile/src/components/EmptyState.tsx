@@ -6,13 +6,14 @@ interface EmptyStateProps {
   title: string
   subtitle: string
   action?: { label: string; onPress: () => void }
+  light?: boolean
 }
 
-export function EmptyState({ title, subtitle, action }: EmptyStateProps) {
+export function EmptyState({ title, subtitle, action, light = false }: EmptyStateProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.subtitle}>{subtitle}</Text>
+      <Text style={[styles.title, { color: light ? colors.white : colors.ink }]}>{title}</Text>
+      <Text style={[styles.subtitle, { color: light ? colors.darkMuted : colors.muted }]}>{subtitle}</Text>
       {action && (
         <TouchableOpacity style={styles.button} onPress={action.onPress} activeOpacity={0.85}>
           <Text style={styles.buttonText}>{action.label}</Text>
@@ -32,13 +33,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontSize.xl,
     fontWeight: '700',
-    color: colors.ink,
     textAlign: 'center',
     marginBottom: spacing.sm,
   },
   subtitle: {
     fontSize: fontSize.md,
-    color: colors.muted,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: spacing.lg,

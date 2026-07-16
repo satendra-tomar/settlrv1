@@ -53,17 +53,17 @@ export function ReviewItem({ review }: ReviewItemProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.white,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
+    backgroundColor: colors.darkCard,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
     gap: spacing.sm,
   },
   avatar: {
@@ -83,9 +83,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.ink,
+    fontSize: fontSize.md,
+    fontWeight: '700',
+    color: colors.white,
   },
   date: {
     fontSize: fontSize.xs,
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   },
   body: {
     fontSize: fontSize.sm,
-    color: colors.ink,
-    lineHeight: 20,
+    color: colors.darkMuted,
+    lineHeight: 22,
   },
 })

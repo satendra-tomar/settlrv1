@@ -61,7 +61,10 @@ export function ImageGallery({ images, height = 260 }: ImageGalleryProps) {
           {sorted.map((_, i) => (
             <View
               key={i}
-              style={[styles.dot, i === activeIndex ? styles.dotActive : styles.dotInactive]}
+              style={[
+                styles.dot,
+                i === activeIndex ? styles.dotActive : styles.dotInactive,
+              ]}
             />
           ))}
         </View>
@@ -77,10 +80,13 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   dotsContainer: {
+    position: 'absolute',
+    bottom: spacing.md,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: spacing.sm,
     gap: spacing.xs,
   },
   dot: {
@@ -89,10 +95,15 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
   },
   dotActive: {
-    backgroundColor: colors.violet,
-    width: 16,
+    backgroundColor: colors.white,
+    width: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2,
   },
   dotInactive: {
-    backgroundColor: colors.border,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
 })
