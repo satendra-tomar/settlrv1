@@ -42,3 +42,10 @@ yarn-error.log*
 
 # Type-check cache
 *.tsbuildinfo
+# Claude workspace
+.claude/
+AGENTS.md
+CLAUDE.md
+extract.js
+phase2_spec.txt
+prompt7.json
