@@ -12,7 +12,10 @@ import ExperienceGrid from './ExperienceGrid'
 import ProsConsCard from './ProsConsCard'
 import PricingSection from './PricingSection'
 import QuickFactsRow from './QuickFactsRow'
-import NearbySection from './NearbySection'
+import { WhyChooseSection } from './WhyChooseSection'
+import { LocationCard } from './LocationCard'
+import { ReviewPreviewSection } from './ReviewPreviewSection'
+import { SimilarListingsSection } from './SimilarListingsSection'
 import { PrimaryActionBar } from './PrimaryActionBar'
 import { AmenityGrid } from '../AmenityGrid'
 import { ReviewItem } from '../ReviewItem'
@@ -23,6 +26,7 @@ import { EmptyState } from '../EmptyState'
 // ---------------------------------------------------------------------------
 interface ListingDetailLayoutProps {
   // Core listing data
+  id: string
   name: string
   type: 'coaching' | 'hostel'
   images: { url: string; is_primary: boolean }[]
@@ -30,6 +34,7 @@ interface ListingDetailLayoutProps {
   rating: number
   reviewCount: number
   isVerified: boolean
+  updatedAt: string
 
   // Placeholder data / Real data
   settlrScore?: number | null
@@ -79,6 +84,7 @@ interface ListingDetailLayoutProps {
 // ---------------------------------------------------------------------------
 function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
   const {
+    id,
     name,
     type,
     images,
@@ -86,6 +92,7 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
     rating,
     reviewCount,
     isVerified,
+    updatedAt,
     settlrScore,
     summary,
     bestFor,
@@ -129,8 +136,8 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
           rating={rating}
           reviewCount={reviewCount}
           isVerified={isVerified}
+          updatedAt={updatedAt}
           settlrScore={settlrScore ?? undefined}
-          quickTags={quickTags}
           isFavorited={isFavorited}
           onFavoritePress={onFavoritePress}
           onCallPress={onCallPress}
@@ -139,7 +146,26 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
 
         {/* Dark content area */}
         <View style={styles.darkContent}>
-          {/* ── 2. Summary ── */}
+          {/* ── 2. Quick Facts (Moved below Hero) ── */}
+          {(quickTags.length > 0 || quickFacts.length > 0) && (
+            <View style={styles.section}>
+              <QuickFactsRow facts={quickFacts} tags={quickTags} />
+            </View>
+          )}
+
+          {/* ── 3. Why Students Choose This ── */}
+          {(bestFor.length > 0 || (experienceScores && experienceScores.length > 0) || (pros && pros.length > 0) || (cons && cons.length > 0)) && (
+            <View style={styles.section}>
+              <WhyChooseSection
+                bestFor={bestFor}
+                experienceScores={experienceScores}
+                pros={pros}
+                cons={cons}
+              />
+            </View>
+          )}
+          
+          {/* ── 4. About ── */}
           {summary ? (
             <View style={styles.section}>
               <SectionTitle title="About" light size="xl" />
@@ -147,33 +173,18 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
             </View>
           ) : null}
 
-          {/* ── 3. Best For ── */}
-          {bestFor.length > 0 && (
+          {/* ── 5. Amenities ── */}
+          {amenities.length > 0 && (
             <View style={styles.section}>
-              <SectionTitle title="Best For" light />
-              <BestForChips items={bestFor} />
-            </View>
-          )}
-
-          {/* ── 4. Student Experience ── */}
-          {experienceScores && experienceScores.length > 0 && (
-            <View style={styles.section}>
-              <SectionTitle title="Student Experience" subtitle="Based on reviews and ratings" light />
-              <ExperienceGrid scores={experienceScores} />
-            </View>
-          )}
-
-          {/* ── 5. Pros & Cons ── */}
-          {((pros && pros.length > 0) || (cons && cons.length > 0)) && (
-            <View style={styles.section}>
-              <SectionTitle title="What Students Say" light />
-              <ProsConsCard pros={pros ?? []} cons={cons ?? []} />
+              <SectionTitle title="Amenities" light />
+              <View style={styles.amenityContainer}>
+                <AmenityGrid amenities={amenities} />
+              </View>
             </View>
           )}
 
           {/* ── 6. Pricing ── */}
           <View style={styles.section}>
-            <SectionTitle title="Pricing" light />
             <PricingSection
               type={type}
               feePerMonth={feePerMonth}
@@ -181,14 +192,6 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
               rentMax={rentMax}
             />
           </View>
-
-          {/* ── 7. Quick Facts ── */}
-          {quickFacts.length > 0 && (
-            <View style={styles.section}>
-              <SectionTitle title="Quick Facts" light />
-              <QuickFactsRow facts={quickFacts} />
-            </View>
-          )}
 
           {/* ── 8. Amenities ── */}
           {amenities.length > 0 && (
@@ -200,40 +203,27 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
             </View>
           )}
 
-          {/* ── 9. Reviews ── */}
-          <View style={styles.section}>
-            <View style={styles.reviewsHeader}>
-              <SectionTitle
-                title={`Reviews${reviewCount > 0 ? ` (${reviewCount})` : ''}`}
-                light
-              />
-              <TouchableOpacity
-                onPress={onWriteReviewPress}
-                activeOpacity={0.8}
-                accessibilityLabel={hasMyReview ? 'Edit your review' : 'Write a review'}
-                style={styles.writeReviewButton}
-              >
-                <Text style={styles.writeReviewLink}>
-                  {hasMyReview ? '✏️ Edit' : '+ Write a review'}
-                </Text>
-              </TouchableOpacity>
+          {/* ── 7. Location ── */}
+          {area && (
+            <View style={styles.section}>
+              <LocationCard area={area} name={name} />
             </View>
+          )}
 
-            {reviews.length === 0 ? (
-              <EmptyState
-                title="No reviews yet"
-                subtitle="Be the first to share your experience!"
-                action={{ label: 'Write a Review', onPress: onWriteReviewPress }}
-                light
-              />
-            ) : (
-              reviews.map((review) => (
-                <ReviewItem key={review.id} review={review as any} />
-              ))
-            )}
+          {/* ── 8. Reviews ── */}
+          <View style={styles.section}>
+            <ReviewPreviewSection
+              listingId={id}
+              rating={rating}
+              reviewCount={reviewCount}
+              reviews={reviews}
+              hasMyReview={hasMyReview}
+              onWriteReviewPress={onWriteReviewPress}
+            />
           </View>
 
-          {/* ── 10. Nearby (Removed for MVP) ── */}
+          {/* ── 9. Similar Listings ── */}
+          <SimilarListingsSection currentListingId={id} type={type} />
 
           {/* Bottom spacer for sticky action bar */}
           <View style={styles.bottomSpacer} />
@@ -242,13 +232,12 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
 
       {/* Sticky bottom action bar */}
       <PrimaryActionBar
-        phone={phone}
-        whatsapp={whatsapp}
-        website={website}
-        isPaid={isPaid}
+        isFavorited={isFavorited}
+        onFavoritePress={onFavoritePress}
         onCallPress={onCallPress}
-        onWhatsAppPress={onWhatsAppPress}
-        onWebsitePress={onWebsitePress}
+        onSharePress={onSharePress}
+        area={area}
+        name={name}
       />
     </View>
   )

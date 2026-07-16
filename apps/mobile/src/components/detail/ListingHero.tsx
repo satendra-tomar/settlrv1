@@ -21,8 +21,8 @@ interface ListingHeroProps {
   rating: number
   reviewCount: number
   isVerified: boolean
+  updatedAt: string
   settlrScore?: number
-  quickTags: string[]
   isFavorited: boolean
   onFavoritePress: () => void
   onCallPress?: () => void
@@ -36,8 +36,8 @@ function ListingHeroComponent({
   rating,
   reviewCount,
   isVerified,
+  updatedAt,
   settlrScore,
-  quickTags,
   isFavorited,
   onFavoritePress,
   onCallPress,
@@ -65,8 +65,8 @@ function ListingHeroComponent({
 
       {/* Gradient overlay */}
       <LinearGradient
-        colors={['transparent', 'rgba(15,11,24,0.6)', colors.dark]}
-        locations={[0.4, 0.8, 1]}
+        colors={['transparent', 'rgba(15,11,24,0.7)', colors.dark]}
+        locations={[0.5, 0.85, 1]}
         style={styles.gradient}
         pointerEvents="none"
       />
@@ -126,16 +126,11 @@ function ListingHeroComponent({
           </View>
         </View>
 
-        {/* Quick tags */}
-        {quickTags.length > 0 && (
-          <View style={styles.tagsRow}>
-            {quickTags.slice(0, 4).map((tag) => (
-              <View key={tag} style={styles.quickTag}>
-                <Text style={styles.quickTagText}>{tag}</Text>
-              </View>
-            ))}
-          </View>
-        )}
+        {/* Updated At */}
+        <View style={styles.updatedRow}>
+          <Text style={styles.updatedText}>Last updated {new Date(updatedAt).toLocaleDateString()}</Text>
+        </View>
+
         <View style={styles.heroActions}>
           {onCallPress && (
             <TouchableOpacity
@@ -308,22 +303,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  tagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-    marginBottom: spacing.sm,
+  updatedRow: {
+    marginBottom: spacing.md,
   },
-  quickTag: {
-    backgroundColor: 'rgba(139,92,246,0.15)',
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-  },
-  quickTagText: {
+  updatedText: {
     fontSize: fontSize.xs,
-    fontWeight: '600',
-    color: colors.violetLight,
+    color: colors.darkMuted,
+    fontWeight: '500',
   },
   heroActions: {
     flexDirection: 'row',

@@ -27,7 +27,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({
         <View style={styles.container} accessibilityLabel={title}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.priceRow}>
-            <Text style={styles.priceAvailable}>Fees Available on Request</Text>
+            <Text style={styles.priceAvailable}>Contact Institute for Latest Fees</Text>
           </Text>
           <Text style={styles.note}>
             Contact the institute for the latest fee structure.
@@ -52,7 +52,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({
       <View style={styles.container} accessibilityLabel={title}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.priceRow}>
-          <Text style={styles.priceAvailable}>Rent Available on Request</Text>
+          <Text style={styles.priceAvailable}>Contact Hostel for Latest Pricing</Text>
         </Text>
         <Text style={styles.note}>
           Contact the hostel for updated pricing.

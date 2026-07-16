@@ -144,6 +144,7 @@ export default function CoachingDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <ListingDetailLayout
+        id={listing.id}
         name={listing.name}
         type="coaching"
         images={listing.listing_images ?? []}
@@ -151,6 +152,7 @@ export default function CoachingDetailScreen() {
         rating={listing.rating}
         reviewCount={listing.review_count}
         isVerified={listing.is_verified}
+        updatedAt={listing.updated_at}
         settlrScore={null}
         summary={listing.description ?? COACHING_SUMMARY}
         bestFor={subjects.length > 0 ? subjects : COACHING_BEST_FOR}

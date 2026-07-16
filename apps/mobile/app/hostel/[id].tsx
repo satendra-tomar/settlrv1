@@ -153,6 +153,7 @@ export default function HostelDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <ListingDetailLayout
+        id={listing.id}
         name={listing.name}
         type="hostel"
         images={listing.listing_images ?? []}
@@ -160,6 +161,7 @@ export default function HostelDetailScreen() {
         rating={listing.rating}
         reviewCount={listing.review_count}
         isVerified={listing.is_verified}
+        updatedAt={listing.updated_at}
         settlrScore={null}
         summary={listing.description ?? HOSTEL_SUMMARY}
         bestFor={roomTypes.length > 0 ? roomTypes : HOSTEL_BEST_FOR}

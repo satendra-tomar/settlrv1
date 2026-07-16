@@ -2,8 +2,7 @@ import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { colors, spacing, fontSize, radius } from '../lib/tokens'
 
-// Maps icon identifier strings (from the amenities table) to emoji/Unicode symbols.
-// A proper icon font replaces this in Phase 4 — do not install an icon package for this.
+// Maps icon identifier strings to emoji/Unicode symbols.
 const ICON_MAP: Record<string, string> = {
   wifi: '📶',
   ac: '❄️',
@@ -13,8 +12,7 @@ const ICON_MAP: Record<string, string> = {
   power: '🔋',
   laundry: '👕',
   parking: '🅿️',
-  // fallback for unmapped icons
-  default: '✓',
+  default: '✨',
 }
 
 function getEmoji(icon: string | null): string {
@@ -33,8 +31,10 @@ export function AmenityGrid({ amenities }: AmenityGridProps) {
     <View style={styles.grid}>
       {amenities.map((amenity, i) => (
         <View key={`${amenity.name}-${i}`} style={styles.item}>
-          <Text style={styles.emoji}>{getEmoji(amenity.icon)}</Text>
-          <Text style={styles.label}>{amenity.name}</Text>
+          <View style={styles.iconCircle}>
+            <Text style={styles.emoji}>{getEmoji(amenity.icon)}</Text>
+          </View>
+          <Text style={styles.label} numberOfLines={2}>{amenity.name}</Text>
         </View>
       ))}
     </View>
@@ -45,24 +45,32 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm,
+    gap: spacing.lg,
+    justifyContent: 'flex-start',
   },
   item: {
-    width: '47%',
-    flexDirection: 'row',
+    width: '28%', // fits 3 per row comfortably
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.sm,
-    padding: spacing.sm,
     gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  iconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   emoji: {
-    fontSize: fontSize.lg,
+    fontSize: 28,
   },
   label: {
     fontSize: fontSize.sm,
-    color: colors.ink,
-    fontWeight: '500',
-    flex: 1,
+    color: colors.white,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 })

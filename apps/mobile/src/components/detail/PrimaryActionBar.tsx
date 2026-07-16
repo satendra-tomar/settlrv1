@@ -1,77 +1,81 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import * as Linking from 'expo-linking'
 import { colors, spacing, fontSize, radius } from '../../lib/tokens'
 
 interface PrimaryActionBarProps {
-  phone?: string | null
-  whatsapp?: string | null
-  website?: string | null
-  isPaid: boolean
+  isFavorited: boolean
+  onFavoritePress: () => void
   onCallPress?: () => void
-  onWhatsAppPress?: () => void
-  onWebsitePress?: () => void
+  onSharePress?: () => void
+  area: string | null
+  name: string
 }
 
-function PrimaryActionBarComponent({
-  phone,
-  whatsapp,
-  website,
-  isPaid,
+export const PrimaryActionBar = React.memo(function PrimaryActionBarComponent({
+  isFavorited,
+  onFavoritePress,
   onCallPress,
-  onWhatsAppPress,
-  onWebsitePress,
+  onSharePress,
+  area,
+  name,
 }: PrimaryActionBarProps) {
   const insets = useSafeAreaInsets()
-  const showCall = Boolean(phone && onCallPress)
-  const showWhatsApp = Boolean(isPaid && whatsapp && onWhatsAppPress)
-  const showWebsite = Boolean(isPaid && website && onWebsitePress)
 
-  if (!showCall && !showWhatsApp && !showWebsite) return null
+  function handleDirections() {
+    if (!area) return
+    const query = encodeURIComponent(`${name}, ${area}`)
+    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${query}`)
+  }
 
   return (
     <View style={[styles.container, { bottom: Math.max(insets.bottom, spacing.md) }]}>
       <View style={styles.inner}>
-        {showCall && (
-          <TouchableOpacity
-            style={[styles.button, styles.callButton]}
-            onPress={onCallPress}
-            activeOpacity={0.85}
-            accessibilityLabel="Call this listing"
-          >
-            <Text style={styles.buttonEmoji}>📞</Text>
-            <Text style={styles.buttonText}>Call Now</Text>
-          </TouchableOpacity>
-        )}
-        {showWhatsApp && (
-          <TouchableOpacity
-            style={[styles.button, styles.whatsappButton]}
-            onPress={onWhatsAppPress}
-            activeOpacity={0.85}
-            accessibilityLabel="Message on WhatsApp"
-          >
-            <Text style={styles.buttonEmoji}>💬</Text>
-            <Text style={styles.buttonText}>WhatsApp</Text>
-          </TouchableOpacity>
-        )}
-        {showWebsite && (
-          <TouchableOpacity
-            style={[styles.button, styles.websiteButton]}
-            onPress={onWebsitePress}
-            activeOpacity={0.85}
-            accessibilityLabel="Visit website"
-          >
-            <Text style={styles.buttonEmoji}>🌐</Text>
-            <Text style={styles.buttonText}>Website</Text>
-          </TouchableOpacity>
-        )}
+        
+        <TouchableOpacity
+          style={[styles.button, styles.iconButton]}
+          onPress={onFavoritePress}
+          activeOpacity={0.85}
+          accessibilityLabel={isFavorited ? 'Remove from saved' : 'Save this listing'}
+        >
+          <Text style={styles.buttonEmoji}>{isFavorited ? '❤️' : '🤍'}</Text>
+          <Text style={styles.buttonText}>Save</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.primaryButton]}
+          onPress={onCallPress}
+          activeOpacity={0.85}
+          disabled={!onCallPress}
+        >
+          <Text style={styles.buttonEmoji}>📞</Text>
+          <Text style={styles.buttonText}>Call</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.secondaryButton]}
+          onPress={handleDirections}
+          activeOpacity={0.85}
+          disabled={!area}
+        >
+          <Text style={styles.buttonEmoji}>📍</Text>
+          <Text style={styles.buttonText}>Directions</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.iconButton]}
+          onPress={onSharePress}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.buttonEmoji}>↗️</Text>
+          <Text style={styles.buttonText}>Share</Text>
+        </TouchableOpacity>
+
       </View>
     </View>
   )
-}
-
-export const PrimaryActionBar = React.memo(PrimaryActionBarComponent)
-PrimaryActionBar.displayName = 'PrimaryActionBar'
+})
 
 const styles = StyleSheet.create({
   container: {
@@ -79,7 +83,7 @@ const styles = StyleSheet.create({
     left: spacing.xl,
     right: spacing.xl,
     backgroundColor: colors.darkCard,
-    borderRadius: 9999, // Pill shape
+    borderRadius: radius.full,
     padding: spacing.xs,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
@@ -100,26 +104,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xs,
     paddingVertical: 14,
-    borderRadius: 9999, // Pill shape
-    minHeight: 52, // Slightly taller
+    borderRadius: radius.full,
+    minHeight: 52,
   },
-  callButton: {
+  primaryButton: {
     backgroundColor: colors.violet,
+    flex: 1.2, // Give slightly more room to primary action
   },
-  whatsappButton: {
-    backgroundColor: colors.whatsapp,
-  },
-  websiteButton: {
-    backgroundColor: colors.darkCard,
+  secondaryButton: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
-    borderColor: colors.darkBorder,
+    borderColor: 'rgba(255,255,255,0.1)',
+    flex: 1.2,
+  },
+  iconButton: {
+    flexDirection: 'column',
+    gap: 2,
+    backgroundColor: 'transparent',
   },
   buttonEmoji: {
     fontSize: 16,
   },
   buttonText: {
     color: colors.white,
-    fontSize: fontSize.sm,
+    fontSize: fontSize.xs,
     fontWeight: '700',
   },
 })
