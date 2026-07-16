@@ -287,9 +287,20 @@ export default function SavedScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionBtn, styles.actionBtnPrimary, selectedIds.size === 0 && styles.actionBtnDisabled]}
-              disabled={selectedIds.size === 0}
+              style={[
+                styles.actionBtn,
+                styles.actionBtnPrimary,
+                (selectedIds.size < 2 || selectedIds.size > 4) && styles.actionBtnDisabled
+              ]}
+              disabled={selectedIds.size < 2 || selectedIds.size > 4}
               activeOpacity={0.8}
+              onPress={() => {
+                // Pass selected IDs as a comma-separated string
+                router.push({
+                  pathname: '/compare',
+                  params: { ids: Array.from(selectedIds).join(',') }
+                })
+              }}
             >
               <Text style={styles.actionBtnPrimaryText}>Compare</Text>
             </TouchableOpacity>
