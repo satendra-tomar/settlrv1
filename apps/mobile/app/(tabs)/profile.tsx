@@ -41,7 +41,7 @@ export default function ProfileScreen() {
           <Text style={styles.placeholderEmail}>Not signed in</Text>
           <TouchableOpacity
             style={styles.primaryButton}
-            onPress={() => router.push('/(auth)/login')}
+            onPress={() => router.push({ pathname: '/(auth)/login', params: { returnUrl: '/(tabs)/profile' } })}
             activeOpacity={0.85}
           >
             <Text style={styles.primaryButtonText}>Log In</Text>
@@ -72,7 +72,6 @@ export default function ProfileScreen() {
           style={styles.signOutButton}
           onPress={async () => {
             await signOut()
-            router.replace('/(tabs)')
           }}
           activeOpacity={0.85}
         >

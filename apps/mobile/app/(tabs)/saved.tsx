@@ -144,7 +144,7 @@ export default function SavedScreen() {
           <View style={styles.emptyActions}>
             <TouchableOpacity
               style={styles.primaryAction}
-              onPress={() => router.push('/(auth)/login')}
+              onPress={() => router.push({ pathname: '/(auth)/login', params: { returnUrl: '/(tabs)/saved' } })}
             >
               <Text style={styles.primaryActionText}>Log In</Text>
             </TouchableOpacity>
