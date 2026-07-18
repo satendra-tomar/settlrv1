@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'expo-router'
 import { supabase } from '../../src/lib/supabase'
 import { colors, spacing, fontSize, radius } from '../../src/lib/tokens'
+import { BRANDING } from '../../src/constants/branding'
 
 export default function LoginScreen() {
   const router = useRouter()
@@ -73,7 +74,7 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.inner}>
-        <Text style={styles.title}>Welcome to Settlr</Text>
+        <Text style={styles.title}>Welcome to {BRANDING.name}</Text>
         <Text style={styles.subtitle}>
           Enter your email to receive a magic link to sign in.
         </Text>

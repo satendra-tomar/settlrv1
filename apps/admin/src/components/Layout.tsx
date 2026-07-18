@@ -9,6 +9,7 @@ import {
   LogOut,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
+import { BRANDING, ASSETS } from '../constants/branding'
 
 const NAV_ITEMS = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -42,8 +43,9 @@ export function Layout() {
       {/* Sidebar */}
       <aside className="w-64 flex flex-col bg-white border-r border-border-subtle shadow-sm z-10">
         {/* Logo */}
-        <div className="px-6 py-6 border-b border-border-subtle">
-          <span className="text-xl font-bold text-brand tracking-tight">Settlr Admin</span>
+        <div className="px-6 py-6 border-b border-border-subtle flex items-center gap-3">
+          <img src={ASSETS.logoSmall} alt={BRANDING.name} className="w-8 h-8 object-contain" />
+          <span className="text-xl font-bold text-brand tracking-tight">{BRANDING.name}</span>
         </div>
 
         {/* Navigation */}

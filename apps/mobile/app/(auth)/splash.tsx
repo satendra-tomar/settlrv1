@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { colors, fontSize, spacing } from '../../src/lib/tokens'
+import { BRANDING, ASSETS } from '../../src/constants/branding'
 
 export default function SplashScreen() {
   const router = useRouter()
@@ -32,12 +33,12 @@ export default function SplashScreen() {
       >
         <View style={styles.center}>
           <Image
-            source={require('../../assets/icon.png')}
+            source={ASSETS.splash}
             style={styles.icon}
             resizeMode="contain"
           />
-          <Text style={styles.wordmark}>Settlr</Text>
-          <Text style={styles.tagline}>Find your perfect coaching & stay</Text>
+          <Text style={styles.wordmark}>{BRANDING.name}</Text>
+          <Text style={styles.tagline}>{BRANDING.tagline}</Text>
         </View>
       </LinearGradient>
     </TouchableOpacity>

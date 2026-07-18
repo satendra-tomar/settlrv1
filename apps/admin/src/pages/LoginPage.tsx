@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { BRANDING, ASSETS } from '../constants/branding'
 
 export function LoginPage() {
   const { role, loading } = useAuth()
@@ -81,9 +82,10 @@ export function LoginPage() {
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-ink">Settlr Admin</h1>
-            <p className="text-muted text-sm mt-1">Sign in to your admin account</p>
+          <div className="text-center mb-8 flex flex-col items-center">
+            <img src={ASSETS.logo} alt={BRANDING.name} className="w-16 h-16 object-contain mb-4" />
+            <h1 className="text-2xl font-bold text-ink">{BRANDING.name}</h1>
+            <p className="text-muted text-sm mt-1">{BRANDING.tagline}</p>
           </div>
 
           {nonAdminError && (

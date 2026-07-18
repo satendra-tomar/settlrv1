@@ -5,7 +5,7 @@
     "scheme": "settlr",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/branding/assets/icon.png",
     "userInterfaceStyle": "light",
     "backgroundColor": "#2A1B44",
     "ios": {
@@ -15,12 +15,13 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#2A1B44",
-        "foregroundImage": "./assets/icon.png"
+        "foregroundImage": "./assets/branding/assets/adaptive-icon-foreground.png",
+        "monochromeImage": "./assets/branding/assets/monochrome-icon.png"
       },
       "package": "com.settlr.app"
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "favicon": "./assets/branding/assets/icon-1024.png",
       "bundler": "metro"
     },
     "plugins": [
@@ -35,7 +36,8 @@
       "expo-image"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "tsconfigPaths": true
     }
   }
 }

@@ -16,7 +16,11 @@
 
     /* Linting — relaxed to allow generated/scaffolded patterns */
     "strict": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "paths": {
+      "@branding/*": ["../../assets/branding/*"]
+    }
   },
   "include": ["src"]
 }
