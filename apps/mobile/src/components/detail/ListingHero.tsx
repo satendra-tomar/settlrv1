@@ -22,6 +22,9 @@ interface ListingHeroProps {
   reviewCount: number
   isVerified: boolean
   updatedAt: string
+  viewsCount: number
+  savesCount: number
+  contactsCount: number
   settlrScore?: number
   isFavorited: boolean
   onFavoritePress: () => void
@@ -35,6 +38,9 @@ function ListingHeroComponent({
   reviewCount,
   isVerified,
   updatedAt,
+  viewsCount,
+  savesCount,
+  contactsCount,
   settlrScore,
   isFavorited,
   onFavoritePress,
@@ -110,7 +116,11 @@ function ListingHeroComponent({
             </View>
           )}
           <View style={styles.ratingBadge}>
-            <RatingStars rating={rating} count={reviewCount} size="md" />
+            {reviewCount > 0 ? (
+              <RatingStars rating={rating} count={reviewCount} size="md" />
+            ) : (
+              <Text style={styles.noRatingsText}>No ratings yet</Text>
+            )}
           </View>
         </View>
 
@@ -118,6 +128,45 @@ function ListingHeroComponent({
         <View style={styles.updatedRow}>
           <Text style={styles.updatedText}>Last updated {new Date(updatedAt).toLocaleDateString()}</Text>
         </View>
+
+        {/* Mocked Social Proof Indicators -> Real Social Proof */}
+        {reviewCount === 0 && viewsCount === 0 && savesCount === 0 && contactsCount === 0 ? (
+          <View style={styles.socialProofRow}>
+            <View style={styles.socialProofItem}>
+              <Text style={styles.socialProofIcon}>✨</Text>
+              <Text style={styles.socialProofText}>New Listing — Recently added to Settlr</Text>
+            </View>
+          </View>
+        ) : (
+          (viewsCount > 0 || savesCount > 0 || contactsCount > 0) && (
+            <View style={styles.socialProofRow}>
+              {viewsCount > 0 && (
+                <View style={styles.socialProofItem}>
+                  <Text style={styles.socialProofIcon}>👀</Text>
+                  <Text style={styles.socialProofText}>
+                    {viewsCount} Student{viewsCount === 1 ? '' : 's'} Viewed
+                  </Text>
+                </View>
+              )}
+              {savesCount > 0 && (
+                <View style={styles.socialProofItem}>
+                  <Text style={styles.socialProofIcon}>❤️</Text>
+                  <Text style={styles.socialProofText}>
+                    {savesCount} Student{savesCount === 1 ? '' : 's'} Saved
+                  </Text>
+                </View>
+              )}
+              {contactsCount > 0 && (
+                <View style={styles.socialProofItem}>
+                  <Text style={styles.socialProofIcon}>📞</Text>
+                  <Text style={styles.socialProofText}>
+                    {contactsCount} Student{contactsCount === 1 ? '' : 's'} Contacted
+                  </Text>
+                </View>
+              )}
+            </View>
+          )
+        )}
 
         <View style={styles.heroActions}>
           <TouchableOpacity
@@ -269,12 +318,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  noRatingsText: {
+    fontSize: fontSize.sm,
+    color: colors.muted,
+    fontWeight: '500',
+  },
   updatedRow: {
     marginBottom: spacing.md,
   },
   updatedText: {
     fontSize: fontSize.xs,
     color: colors.darkMuted,
+    fontWeight: '500',
+  },
+  socialProofRow: {
+    flexDirection: 'column',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  socialProofItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  socialProofIcon: {
+    fontSize: 14,
+  },
+  socialProofText: {
+    fontSize: fontSize.sm,
+    color: colors.muted,
     fontWeight: '500',
   },
   heroActions: {

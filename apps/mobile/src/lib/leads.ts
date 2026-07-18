@@ -9,10 +9,18 @@ export interface TrackLeadParams {
 }
 
 export class LeadTracker {
-  static async track(params: TrackLeadParams): Promise<void> {
+  static track(params: TrackLeadParams): void {
     const { type, listingId, listingType } = params
+    
+    // Non-blocking fire-and-forget execution
+    Promise.resolve().then(async () => {
+      console.log(`[LeadTracker] Tracking event locally: ${type} for ${listingType} ${listingId}`)
 
-    console.log(`[LeadTracker] Tracking event locally: ${type} for ${listingType} ${listingId}`)
+      const env = process.env.EXPO_PUBLIC_APP_ENV || (__DEV__ ? 'development' : 'production')
+      if (env !== 'production') {
+        console.log(`[LeadTracker] Skipping tracking in ${env} environment: ${type} for ${listingId}`)
+        return
+      }
 
     // Only send to Supabase if the event type is supported by the enum
     // Currently supported in enum: 'view', 'call_click', 'whatsapp_click', 'direction_click', 'website_click'
@@ -36,6 +44,7 @@ export class LeadTracker {
         console.warn(`[LeadTracker] Error fetching user for tracking:`, e)
       }
     }
+    })
   }
 }
 

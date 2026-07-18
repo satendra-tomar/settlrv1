@@ -1,15 +1,13 @@
-import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import React, { useState } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native'
 import { colors, spacing, fontSize, radius } from '../lib/tokens'
 import { RatingStars } from './RatingStars'
+import type { ReviewItem as ReviewItemType } from '../hooks/useReviews'
+import { useAuth } from '../hooks/useAuth'
+import { useToggleHelpful } from '../hooks/useReviews'
 
 interface ReviewItemProps {
-  review: {
-    rating: number
-    body: string | null
-    created_at: string
-    profiles: { full_name: string | null } | null
-  }
+  review: ReviewItemType
 }
 
 /** Simple relative date — no date library dependency. */
@@ -30,7 +28,44 @@ function relativeDate(iso: string): string {
 }
 
 export function ReviewItem({ review }: ReviewItemProps) {
-  const name = review.profiles?.full_name ?? 'Anonymous'
+  const { user } = useAuth()
+  const toggleHelpful = useToggleHelpful()
+  
+  // Local state for optimistic updates
+  const [helpfulCount, setHelpfulCount] = useState(review.helpful_count || 0)
+  const [isHelpfulLocal, setIsHelpfulLocal] = useState(false) // Assuming false initially without backend tracking per user
+
+  const name = review.is_anonymous 
+    ? 'Anonymous' 
+    : review.profiles?.full_name ?? 'Anonymous'
+
+  const handleHelpfulPress = () => {
+    if (!user) return // Should prompt login in real app
+    
+    const newValue = !isHelpfulLocal
+    setIsHelpfulLocal(newValue)
+    setHelpfulCount((prev) => newValue ? prev + 1 : prev - 1)
+    
+    toggleHelpful.mutate({
+      reviewId: review.id,
+      userId: user.id,
+      isHelpful: newValue,
+    })
+  }
+
+  const handleReportPress = () => {
+    // Basic mock report alert
+    Alert.alert(
+      "Report Review",
+      "Why are you reporting this review?",
+      [
+        { text: "Spam", onPress: () => console.log('Reported Spam') },
+        { text: "Abusive", onPress: () => console.log('Reported Abusive') },
+        { text: "Fake", onPress: () => console.log('Reported Fake') },
+        { text: "Cancel", style: "cancel" }
+      ]
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -39,14 +74,48 @@ export function ReviewItem({ review }: ReviewItemProps) {
           <Text style={styles.avatarText}>{name.charAt(0).toUpperCase()}</Text>
         </View>
         <View style={styles.headerInfo}>
-          <Text style={styles.name}>{name}</Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.name}>{name}</Text>
+            {review.is_verified && (
+              <View style={styles.verifiedBadge}>
+                <Text style={styles.verifiedText}>✓ Verified</Text>
+              </View>
+            )}
+          </View>
           <Text style={styles.date}>{relativeDate(review.created_at)}</Text>
         </View>
         <RatingStars rating={review.rating} size="sm" />
       </View>
+      
+      {review.title ? (
+        <Text style={styles.title}>{review.title}</Text>
+      ) : null}
+
       {review.body ? (
         <Text style={styles.body}>{review.body}</Text>
       ) : null}
+
+      <View style={styles.footer}>
+        <TouchableOpacity 
+          style={styles.actionBtn} 
+          onPress={handleHelpfulPress}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.actionIcon, isHelpfulLocal && styles.actionIconActive]}>👍</Text>
+          <Text style={[styles.actionText, isHelpfulLocal && styles.actionTextActive]}>
+            Helpful ({helpfulCount})
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.actionBtn} 
+          onPress={handleReportPress}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.actionIcon}>🚩</Text>
+          <Text style={styles.actionText}>Report</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }
@@ -82,19 +151,75 @@ const styles = StyleSheet.create({
   headerInfo: {
     flex: 1,
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
   name: {
     fontSize: fontSize.md,
     fontWeight: '700',
     color: colors.white,
+  },
+  verifiedBadge: {
+    backgroundColor: 'rgba(16,185,129,0.1)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(16,185,129,0.2)',
+  },
+  verifiedText: {
+    color: colors.emerald,
+    fontSize: 10,
+    fontWeight: '700',
   },
   date: {
     fontSize: fontSize.xs,
     color: colors.muted,
     marginTop: 2,
   },
+  title: {
+    fontSize: fontSize.md,
+    fontWeight: '700',
+    color: colors.white,
+    marginBottom: spacing.xs,
+  },
   body: {
     fontSize: fontSize.sm,
     color: colors.darkMuted,
     lineHeight: 22,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderColor: colors.darkBorder,
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.md,
+  },
+  actionIcon: {
+    fontSize: 14,
+    opacity: 0.7,
+  },
+  actionIconActive: {
+    opacity: 1,
+  },
+  actionText: {
+    fontSize: fontSize.xs,
+    fontWeight: '600',
+    color: colors.muted,
+  },
+  actionTextActive: {
+    color: colors.violetLight,
   },
 })

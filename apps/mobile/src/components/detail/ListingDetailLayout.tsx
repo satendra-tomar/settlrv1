@@ -36,6 +36,9 @@ interface ListingDetailLayoutProps {
   reviewCount: number
   isVerified: boolean
   updatedAt: string
+  viewsCount: number
+  savesCount: number
+  contactsCount: number
 
   // Placeholder data / Real data
   settlrScore?: number | null
@@ -90,6 +93,9 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
     reviewCount,
     isVerified,
     updatedAt,
+    viewsCount,
+    savesCount,
+    contactsCount,
     settlrScore,
     summary,
     bestFor,
@@ -130,6 +136,9 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
           reviewCount={reviewCount}
           isVerified={isVerified}
           updatedAt={updatedAt}
+          viewsCount={viewsCount}
+          savesCount={savesCount}
+          contactsCount={contactsCount}
           settlrScore={settlrScore ?? undefined}
           isFavorited={isFavorited}
           onFavoritePress={onFavoritePress}

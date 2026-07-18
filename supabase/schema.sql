@@ -159,18 +159,47 @@ CREATE TABLE listing_images (
 -- 2.9 reviews
 -- ---------------------------------------------------------------------------
 CREATE TABLE reviews (
-    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    listing_id  UUID        NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
-    user_id     UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    rating      SMALLINT    NOT NULL,
-    body        TEXT,
-    is_approved BOOLEAN     NOT NULL DEFAULT false,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    id            UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    listing_id    UUID        NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+    user_id       UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    rating        SMALLINT    NOT NULL,
+    title         TEXT,
+    body          TEXT,
+    is_anonymous  BOOLEAN     NOT NULL DEFAULT false,
+    is_verified   BOOLEAN     NOT NULL DEFAULT false,
+    recommend     BOOLEAN,
+    helpful_count INTEGER     NOT NULL DEFAULT 0,
+    is_approved   BOOLEAN     NOT NULL DEFAULT false,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     -- Exactly one review per student per listing
     CONSTRAINT uq_review_per_user_listing UNIQUE (listing_id, user_id),
     -- Rating must be between 1 and 5
     CONSTRAINT chk_rating_range CHECK (rating BETWEEN 1 AND 5)
+);
+
+-- ---------------------------------------------------------------------------
+-- 2.9.1 review_helpful_votes
+-- ---------------------------------------------------------------------------
+CREATE TABLE review_helpful_votes (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    review_id   UUID        NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
+    user_id     UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uq_review_helpful UNIQUE (review_id, user_id)
+);
+
+-- ---------------------------------------------------------------------------
+-- 2.9.2 review_reports
+-- ---------------------------------------------------------------------------
+CREATE TABLE review_reports (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    review_id   UUID        NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
+    user_id     UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    reason      TEXT        NOT NULL,
+    status      TEXT        NOT NULL DEFAULT 'pending',
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uq_review_report UNIQUE (review_id, user_id)
 );
 
 -- ---------------------------------------------------------------------------
@@ -663,6 +692,46 @@ CREATE POLICY "reviews: admin full write"
     WITH CHECK (is_admin());
 
 -- ---------------------------------------------------------------------------
+-- 6.9.1 review_helpful_votes
+-- ---------------------------------------------------------------------------
+ALTER TABLE review_helpful_votes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "review_helpful_votes: owner read own"
+    ON review_helpful_votes FOR SELECT
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "review_helpful_votes: owner insert own"
+    ON review_helpful_votes FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "review_helpful_votes: owner delete own"
+    ON review_helpful_votes FOR DELETE
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "review_helpful_votes: admin full write"
+    ON review_helpful_votes FOR ALL
+    USING (is_admin())
+    WITH CHECK (is_admin());
+
+-- ---------------------------------------------------------------------------
+-- 6.9.2 review_reports
+-- ---------------------------------------------------------------------------
+ALTER TABLE review_reports ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "review_reports: owner read own"
+    ON review_reports FOR SELECT
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "review_reports: owner insert own"
+    ON review_reports FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "review_reports: admin full write"
+    ON review_reports FOR ALL
+    USING (is_admin())
+    WITH CHECK (is_admin());
+
+-- ---------------------------------------------------------------------------
 -- 6.10 favorites
 -- ---------------------------------------------------------------------------
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
@@ -707,3 +776,52 @@ CREATE POLICY "lead_events: admin update"
 CREATE POLICY "lead_events: admin delete"
     ON lead_events FOR DELETE
     USING (is_admin());
+
+-- ---------------------------------------------------------------------------
+-- 2.12 listing_views
+-- ---------------------------------------------------------------------------
+CREATE TABLE listing_views (
+    id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    listing_id      UUID        NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+    user_id         UUID        REFERENCES auth.users(id) ON DELETE CASCADE,
+    anonymous_id    UUID,
+    device_type     TEXT,       -- e.g. 'android', 'ios', 'web'
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    last_viewed_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT chk_listing_views_identity CHECK (user_id IS NOT NULL OR anonymous_id IS NOT NULL)
+);
+
+CREATE UNIQUE INDEX uq_listing_views_user ON listing_views (listing_id, user_id) WHERE user_id IS NOT NULL;
+CREATE UNIQUE INDEX uq_listing_views_anon ON listing_views (listing_id, anonymous_id) WHERE anonymous_id IS NOT NULL;
+
+ALTER TABLE listing_views ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "listing_views: public read"
+    ON listing_views FOR SELECT
+    USING (true);
+
+CREATE OR REPLACE FUNCTION record_listing_view(
+    p_listing_id UUID,
+    p_user_id UUID,
+    p_anonymous_id UUID,
+    p_device_type TEXT
+) RETURNS void AS $$
+BEGIN
+    IF p_user_id IS NOT NULL THEN
+        INSERT INTO listing_views (listing_id, user_id, device_type, created_at, last_viewed_at)
+        VALUES (p_listing_id, p_user_id, p_device_type, now(), now())
+        ON CONFLICT (listing_id, user_id) WHERE user_id IS NOT NULL
+        DO UPDATE SET 
+            last_viewed_at = now(),
+            device_type = COALESCE(p_device_type, listing_views.device_type);
+    ELSE
+        INSERT INTO listing_views (listing_id, anonymous_id, device_type, created_at, last_viewed_at)
+        VALUES (p_listing_id, p_anonymous_id, p_device_type, now(), now())
+        ON CONFLICT (listing_id, anonymous_id) WHERE anonymous_id IS NOT NULL
+        DO UPDATE SET 
+            last_viewed_at = now(),
+            device_type = COALESCE(p_device_type, listing_views.device_type);
+    END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+

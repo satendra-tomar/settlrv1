@@ -8,6 +8,7 @@ import { useLocalSearchParams, useRouter, Stack } from 'expo-router'
 import * as Linking from 'expo-linking'
 import { useListingDetail } from '../../src/hooks/useListingDetail'
 import { useReviews, useMyReview } from '../../src/hooks/useReviews'
+import { useListingStats, recordView } from '../../src/hooks/useListingStats'
 import { useIsFavorited, useToggleFavorite } from '../../src/hooks/useFavorites'
 import { useAuth } from '../../src/hooks/useAuth'
 import { LeadTracker } from '../../src/lib/leads'
@@ -39,13 +40,14 @@ export default function HostelDetailScreen() {
 
   const { data: listing, isLoading, error, refetch } = useListingDetail(id, 'hostel')
   const { data: reviews } = useReviews(id)
+  const { data: stats } = useListingStats(id)
   const { data: myReview } = useMyReview(id, user?.id ?? null)
   const { data: favRow } = useIsFavorited(id, user?.id ?? null)
   const toggleFavorite = useToggleFavorite()
 
   // Fire-and-forget lead view on mount
   React.useEffect(() => {
-    if (id) LeadTracker.track({ type: 'view', listingId: id, listingType: 'hostel' })
+    if (id) recordView(id)
   }, [id])
 
   function handleFavorite() {
@@ -143,6 +145,9 @@ export default function HostelDetailScreen() {
         reviewCount={listing.review_count}
         isVerified={listing.is_verified}
         updatedAt={listing.updated_at}
+        viewsCount={stats?.views ?? 0}
+        savesCount={stats?.saves ?? 0}
+        contactsCount={stats?.contacts ?? 0}
         settlrScore={null}
         summary={listing.description ?? HOSTEL_SUMMARY}
         bestFor={roomTypes.length > 0 ? roomTypes : HOSTEL_BEST_FOR}

@@ -273,6 +273,49 @@ export type Database = {
           }
         ]
       }
+      listing_views: {
+        Row: {
+          id: string
+          listing_id: string
+          user_id: string | null
+          anonymous_id: string | null
+          device_type: string | null
+          created_at: string
+          last_viewed_at: string
+        }
+        Insert: {
+          id?: string
+          listing_id: string
+          user_id?: string | null
+          anonymous_id?: string | null
+          device_type?: string | null
+          created_at?: string
+          last_viewed_at?: string
+        }
+        Update: {
+          id?: string
+          listing_id?: string
+          user_id?: string | null
+          anonymous_id?: string | null
+          device_type?: string | null
+          created_at?: string
+          last_viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'listing_views_listing_id_fkey'
+            columns: ['listing_id']
+            referencedRelation: 'listings'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'listing_views_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       listings: {
         Row: {
           id: string
@@ -376,33 +419,125 @@ export type Database = {
           listing_id: string
           user_id: string
           rating: number
+          title: string | null
           body: string | null
+          is_anonymous: boolean
+          is_verified: boolean
+          recommend: boolean | null
+          helpful_count: number
           is_approved: boolean
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
           listing_id: string
           user_id: string
           rating: number
+          title?: string | null
           body?: string | null
+          is_anonymous?: boolean
+          is_verified?: boolean
+          recommend?: boolean | null
+          helpful_count?: number
           is_approved?: boolean
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
           listing_id?: string
           user_id?: string
           rating?: number
+          title?: string | null
           body?: string | null
+          is_anonymous?: boolean
+          is_verified?: boolean
+          recommend?: boolean | null
+          helpful_count?: number
           is_approved?: boolean
           created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: 'reviews_listing_id_fkey'
             columns: ['listing_id']
             referencedRelation: 'listings'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      review_helpful_votes: {
+        Row: {
+          id: string
+          review_id: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          review_id: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          review_id?: string
+          user_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'review_helpful_votes_review_id_fkey'
+            columns: ['review_id']
+            referencedRelation: 'reviews'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'review_helpful_votes_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      review_reports: {
+        Row: {
+          id: string
+          review_id: string
+          user_id: string
+          reason: string
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          review_id: string
+          user_id: string
+          reason: string
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          review_id?: string
+          user_id?: string
+          reason?: string
+          status?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'review_reports_review_id_fkey'
+            columns: ['review_id']
+            referencedRelation: 'reviews'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'review_reports_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'users'
             referencedColumns: ['id']
           }
         ]
@@ -422,10 +557,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      record_listing_view: {
+        Args: {
+          p_listing_id: string
+          p_user_id: string | null
+          p_anonymous_id: string | null
+          p_device_type: string | null
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       hostel_gender: 'male' | 'female' | 'co_ed'
-      lead_event_type: 'call' | 'whatsapp' | 'website' | 'view'
+      lead_event_type: 'view' | 'call_click' | 'whatsapp_click' | 'direction_click' | 'website_click' | 'share_click'
       listing_type: 'coaching' | 'hostel'
       plan_tier: 'free' | 'paid'
       user_role: 'student' | 'admin'

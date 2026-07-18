@@ -2,8 +2,7 @@ import React from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { colors, radius, spacing, fontSize } from '../../lib/tokens'
 import { ReviewItem } from '../ReviewItem'
-import { EmptyState } from '../EmptyState'
-import SectionTitle from './SectionTitle'
+import { ReviewOverview } from './ReviewOverview'
 import type { ReviewItem as ReviewItemType } from '../../hooks/useReviews'
 import { useRouter } from 'expo-router'
 
@@ -29,41 +28,37 @@ export function ReviewPreviewSection({
   if (reviews.length === 0) {
     return (
       <View style={styles.container}>
-        <SectionTitle title="Reviews" light />
-        <EmptyState
-          title="No reviews yet"
-          subtitle="Be the first to share your experience!"
-          action={{ label: 'Write a Review', onPress: onWriteReviewPress }}
-          light
+        <ReviewOverview
+          listingId={listingId}
+          rating={rating}
+          reviewCount={reviewCount}
+          reviews={reviews}
+          hasMyReview={hasMyReview}
         />
       </View>
     )
   }
 
-  // Show only up to 2 recent reviews
+  // Show only up to 2 recent reviews for preview
   const previewReviews = reviews.slice(0, 2)
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.avgRating}>⭐ {rating.toFixed(1)}</Text>
-          <Text style={styles.countText}>from {reviewCount} reviews</Text>
-        </View>
-        <TouchableOpacity
-          onPress={onWriteReviewPress}
-          activeOpacity={0.8}
-          style={styles.writeReviewButton}
-        >
-          <Text style={styles.writeReviewLink}>
-            {hasMyReview ? '✏️ Edit' : '+ Write a review'}
-          </Text>
-        </TouchableOpacity>
+      <ReviewOverview
+        listingId={listingId}
+        rating={rating}
+        reviewCount={reviewCount}
+        reviews={reviews}
+        hasMyReview={hasMyReview}
+      />
+
+      <View style={styles.latestReviewsHeader}>
+        <Text style={styles.latestReviewsTitle}>Latest Reviews</Text>
       </View>
 
       <View style={styles.reviewsList}>
         {previewReviews.map((review) => (
-          <ReviewItem key={review.id} review={review as any} />
+          <ReviewItem key={review.id} review={review} />
         ))}
       </View>
 
@@ -84,36 +79,14 @@ const styles = StyleSheet.create({
   container: {
     // margins handled by layout
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
+  latestReviewsHeader: {
+    marginTop: spacing.xl,
+    marginBottom: spacing.md,
   },
-  headerLeft: {},
-  avgRating: {
-    fontSize: 32,
-    fontWeight: '900',
-    color: colors.white,
-    letterSpacing: -1,
-  },
-  countText: {
-    fontSize: fontSize.sm,
-    color: colors.darkMuted,
-    fontWeight: '500',
-    marginTop: 4,
-  },
-  writeReviewButton: {
-    minHeight: 44,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    backgroundColor: 'rgba(139,92,246,0.1)',
-    borderRadius: radius.full,
-  },
-  writeReviewLink: {
-    fontSize: fontSize.sm,
-    color: colors.violetLight,
+  latestReviewsTitle: {
+    fontSize: fontSize.lg,
     fontWeight: '700',
+    color: colors.white,
   },
   reviewsList: {
     gap: spacing.lg,

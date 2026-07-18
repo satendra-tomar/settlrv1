@@ -8,6 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   SafeAreaView,
+  Switch,
 } from 'react-native'
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router'
 import { useAuth } from '../../../src/hooks/useAuth'
@@ -26,14 +27,22 @@ export default function WriteReviewScreen() {
   const submitReview = useSubmitReview()
 
   const [rating, setRating] = useState(0)
+  const [title, setTitle] = useState('')
   const [comment, setComment] = useState('')
+  const [isAnonymous, setIsAnonymous] = useState(false)
   const [ratingError, setRatingError] = useState(false)
+
+  // Validation lengths
+  const MIN_COMMENT_LENGTH = 10
+  const MAX_COMMENT_LENGTH = 1000
 
   // Pre-fill if editing existing review
   React.useEffect(() => {
     if (existingReview) {
       setRating(existingReview.rating)
+      setTitle(existingReview.title ?? '')
       setComment(existingReview.body ?? '')
+      setIsAnonymous(existingReview.is_anonymous ?? false)
     }
   }, [existingReview])
 
@@ -52,7 +61,10 @@ export default function WriteReviewScreen() {
       listingId,
       userId: user.id,
       rating,
-      body: comment,
+      title: title.trim() || null,
+      body: comment.trim() || null,
+      isAnonymous,
+      recommend: rating >= 4, // Simple heuristic for now
       existingReviewId: existingReview?.id,
     })
 
@@ -94,25 +106,58 @@ export default function WriteReviewScreen() {
           <Text style={styles.error}>Please select a star rating before submitting.</Text>
         )}
 
+        {/* Title */}
+        <Text style={styles.label}>Title (optional)</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Sum up your experience in a few words"
+          placeholderTextColor={colors.muted}
+          value={title}
+          onChangeText={setTitle}
+          maxLength={100}
+        />
+
         {/* Comment */}
-        <Text style={styles.label}>Your experience (optional)</Text>
+        <View style={styles.labelRow}>
+          <Text style={styles.label}>Your experience (optional)</Text>
+          <Text style={styles.charCount}>
+            {comment.length} / {MAX_COMMENT_LENGTH}
+          </Text>
+        </View>
         <TextInput
           style={styles.commentInput}
-          placeholder="Share your experience..."
+          placeholder="Share details about your experience..."
           placeholderTextColor={colors.muted}
           multiline
           numberOfLines={5}
           textAlignVertical="top"
           value={comment}
           onChangeText={setComment}
-          maxLength={1000}
+          maxLength={MAX_COMMENT_LENGTH}
         />
+        {comment.length > 0 && comment.length < MIN_COMMENT_LENGTH && (
+          <Text style={styles.errorText}>Please write at least {MIN_COMMENT_LENGTH} characters.</Text>
+        )}
+
+        {/* Anonymous Toggle */}
+        <View style={styles.anonymousRow}>
+          <View style={styles.anonymousTextCol}>
+            <Text style={styles.anonymousTitle}>Post Anonymously</Text>
+            <Text style={styles.anonymousSub}>Hide your name from public view</Text>
+          </View>
+          <Switch
+            value={isAnonymous}
+            onValueChange={setIsAnonymous}
+            trackColor={{ false: colors.darkBorder, true: colors.violet }}
+            thumbColor={colors.white}
+          />
+        </View>
 
         {/* Submit */}
         <TouchableOpacity
-          style={[styles.submitButton, submitReview.isPending && styles.buttonDisabled]}
+          style={[styles.submitButton, (submitReview.isPending || (comment.length > 0 && comment.length < MIN_COMMENT_LENGTH)) && styles.buttonDisabled]}
           onPress={handleSubmit}
-          disabled={submitReview.isPending}
+          disabled={submitReview.isPending || (comment.length > 0 && comment.length < MIN_COMMENT_LENGTH)}
           activeOpacity={0.85}
         >
           {submitReview.isPending ? (
@@ -173,6 +218,31 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     marginBottom: spacing.sm,
   },
+  errorText: {
+    color: '#EF4444',
+    fontSize: fontSize.xs,
+    marginTop: -spacing.sm,
+    marginBottom: spacing.md,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+  },
+  charCount: {
+    fontSize: fontSize.xs,
+    color: colors.muted,
+  },
+  textInput: {
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    fontSize: fontSize.md,
+    color: colors.ink,
+    backgroundColor: colors.white,
+    marginBottom: spacing.lg,
+  },
   commentInput: {
     borderWidth: 1.5,
     borderColor: colors.border,
@@ -183,6 +253,29 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     height: 130,
     marginBottom: spacing.lg,
+  },
+  anonymousRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.md,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: colors.border,
+    marginBottom: spacing.xl,
+  },
+  anonymousTextCol: {
+    flex: 1,
+  },
+  anonymousTitle: {
+    fontSize: fontSize.md,
+    fontWeight: '600',
+    color: colors.ink,
+  },
+  anonymousSub: {
+    fontSize: fontSize.sm,
+    color: colors.muted,
+    marginTop: 2,
   },
   submitButton: {
     backgroundColor: colors.violet,
