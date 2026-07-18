@@ -10,7 +10,7 @@ import { useListingDetail } from '../../src/hooks/useListingDetail'
 import { useReviews, useMyReview } from '../../src/hooks/useReviews'
 import { useIsFavorited, useToggleFavorite } from '../../src/hooks/useFavorites'
 import { useAuth } from '../../src/hooks/useAuth'
-import { recordLead } from '../../src/lib/leads'
+import { LeadTracker } from '../../src/lib/leads'
 import { EmptyState } from '../../src/components/EmptyState'
 import { DetailSkeleton } from '../../src/components/detail/DetailSkeleton'
 import { AuthPromptModal } from '../../src/components/AuthPromptModal'
@@ -45,7 +45,7 @@ export default function HostelDetailScreen() {
 
   // Fire-and-forget lead view on mount
   React.useEffect(() => {
-    if (id) recordLead(id, 'view')
+    if (id) LeadTracker.track({ type: 'view', listingId: id, listingType: 'hostel' })
   }, [id])
 
   function handleFavorite() {
@@ -74,25 +74,6 @@ export default function HostelDetailScreen() {
       return
     }
     router.push(`/review/write/${id}`)
-  }
-
-  async function handleCall() {
-    if (!listing?.phone) return
-    recordLead(id, 'call')
-    await Linking.openURL(`tel:${listing.phone}`)
-  }
-
-  async function handleWhatsApp() {
-    if (!listing?.whatsapp) return
-    recordLead(id, 'whatsapp')
-    const number = listing.whatsapp.replace(/[^0-9]/g, '')
-    await Linking.openURL(`https://wa.me/${number}`)
-  }
-
-  async function handleWebsite() {
-    if (!listing?.website_url) return
-    recordLead(id, 'website')
-    await Linking.openURL(listing.website_url)
   }
 
   const isFavorited = Boolean(favRow)
@@ -182,9 +163,6 @@ export default function HostelDetailScreen() {
         website={listing.website_url}
         isPaid={listing.plan_tier === 'paid'}
         onFavoritePress={handleFavorite}
-        onCallPress={listing.phone ? handleCall : undefined}
-        onWhatsAppPress={listing.whatsapp ? handleWhatsApp : undefined}
-        onWebsitePress={listing.website_url ? handleWebsite : undefined}
         onWriteReviewPress={handleWriteReview}
       />
 

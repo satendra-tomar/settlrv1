@@ -25,8 +25,6 @@ interface ListingHeroProps {
   settlrScore?: number
   isFavorited: boolean
   onFavoritePress: () => void
-  onCallPress?: () => void
-  onSharePress?: () => void
 }
 
 function ListingHeroComponent({
@@ -40,8 +38,6 @@ function ListingHeroComponent({
   settlrScore,
   isFavorited,
   onFavoritePress,
-  onCallPress,
-  onSharePress,
 }: ListingHeroProps) {
   const hasMultipleImages = images.length > 1
   const primaryImage = images.find((img) => img.is_primary) ?? images[0]
@@ -73,14 +69,6 @@ function ListingHeroComponent({
 
       {/* Top action buttons */}
       <View style={styles.topActions}>
-        <TouchableOpacity
-          style={styles.topButton}
-          onPress={onSharePress}
-          activeOpacity={0.8}
-          accessibilityLabel="Share this listing"
-        >
-          <Text style={styles.topButtonText}>↗</Text>
-        </TouchableOpacity>
         <TouchableOpacity
           style={styles.topButton}
           onPress={onFavoritePress}
@@ -132,17 +120,6 @@ function ListingHeroComponent({
         </View>
 
         <View style={styles.heroActions}>
-          {onCallPress && (
-            <TouchableOpacity
-              style={styles.heroActionButton}
-              onPress={onCallPress}
-              activeOpacity={0.8}
-              accessibilityLabel="Call this listing"
-            >
-              <Text style={styles.heroActionEmoji}>📞</Text>
-              <Text style={styles.heroActionText}>Call</Text>
-            </TouchableOpacity>
-          )}
           <TouchableOpacity
             style={styles.heroActionButton}
             onPress={onFavoritePress}
@@ -152,17 +129,6 @@ function ListingHeroComponent({
             <Text style={styles.heroActionEmoji}>{isFavorited ? '❤️' : '🤍'}</Text>
             <Text style={styles.heroActionText}>Save</Text>
           </TouchableOpacity>
-          {onSharePress && (
-            <TouchableOpacity
-              style={styles.heroActionButton}
-              onPress={onSharePress}
-              activeOpacity={0.8}
-              accessibilityLabel="Share this listing"
-            >
-              <Text style={styles.heroActionEmoji}>↗️</Text>
-              <Text style={styles.heroActionText}>Share</Text>
-            </TouchableOpacity>
-          )}
         </View>
       </View>
     </View>

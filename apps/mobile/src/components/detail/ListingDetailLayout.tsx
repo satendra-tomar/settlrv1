@@ -20,6 +20,7 @@ import { PrimaryActionBar } from './PrimaryActionBar'
 import { AmenityGrid } from '../AmenityGrid'
 import { ReviewItem } from '../ReviewItem'
 import { EmptyState } from '../EmptyState'
+import { ContactCard } from './ContactCard'
 
 // ---------------------------------------------------------------------------
 // Props
@@ -72,10 +73,6 @@ interface ListingDetailLayoutProps {
 
   // Callbacks (business logic stays in screen)
   onFavoritePress: () => void
-  onCallPress?: () => void
-  onWhatsAppPress?: () => void
-  onWebsitePress?: () => void
-  onSharePress?: () => void
   onWriteReviewPress: () => void
 }
 
@@ -114,10 +111,6 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
     website,
     isPaid,
     onFavoritePress,
-    onCallPress,
-    onWhatsAppPress,
-    onWebsitePress,
-    onSharePress,
     onWriteReviewPress,
   } = props
 
@@ -140,8 +133,6 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
           settlrScore={settlrScore ?? undefined}
           isFavorited={isFavorited}
           onFavoritePress={onFavoritePress}
-          onCallPress={onCallPress}
-          onSharePress={onSharePress}
         />
 
         {/* Dark content area */}
@@ -152,6 +143,20 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
               <QuickFactsRow facts={quickFacts} tags={quickTags} />
             </View>
           )}
+
+          {/* ── 2.5 Contact Card ── */}
+          <View style={styles.section}>
+            <ContactCard
+              listingId={id}
+              listingType={type}
+              name={name}
+              area={area}
+              phone={phone ?? null}
+              whatsapp={whatsapp ?? null}
+              website={website ?? null}
+              isVerified={isVerified}
+            />
+          </View>
 
           {/* ── 3. Why Students Choose This ── */}
           {(bestFor.length > 0 || (experienceScores && experienceScores.length > 0) || (pros && pros.length > 0) || (cons && cons.length > 0)) && (
@@ -232,12 +237,14 @@ function ListingDetailLayoutComponent(props: ListingDetailLayoutProps) {
 
       {/* Sticky bottom action bar */}
       <PrimaryActionBar
+        listingId={id}
+        listingType={type}
         isFavorited={isFavorited}
         onFavoritePress={onFavoritePress}
-        onCallPress={onCallPress}
-        onSharePress={onSharePress}
-        area={area}
         name={name}
+        area={area}
+        phone={phone ?? null}
+        whatsapp={whatsapp ?? null}
       />
     </View>
   )

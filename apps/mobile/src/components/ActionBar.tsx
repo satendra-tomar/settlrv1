@@ -1,12 +1,13 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import * as Linking from 'expo-linking'
-import { recordLead } from '../lib/leads'
+import { LeadTracker } from '../lib/leads'
 import { colors, radius, spacing, fontSize } from '../lib/tokens'
 import type { Enums } from '../types/database'
 
 interface ActionBarProps {
   listingId: string
+  listingType?: 'coaching' | 'hostel'
   phone?: string | null
   whatsapp?: string | null
   website?: string | null
@@ -15,6 +16,7 @@ interface ActionBarProps {
 
 export function ActionBar({
   listingId,
+  listingType = 'coaching', // fallback
   phone,
   whatsapp,
   website,
@@ -24,21 +26,20 @@ export function ActionBar({
 
   async function handleCall() {
     if (!phone) return
-    // Fire-and-forget — never awaited so dialer opens immediately
-    recordLead(listingId, 'call')
+    LeadTracker.track({ type: 'call_click', listingId, listingType })
     await Linking.openURL(`tel:${phone}`)
   }
 
   async function handleWhatsApp() {
     if (!whatsapp) return
-    recordLead(listingId, 'whatsapp')
+    LeadTracker.track({ type: 'whatsapp_click', listingId, listingType })
     const number = whatsapp.replace(/[^0-9]/g, '')
     await Linking.openURL(`https://wa.me/${number}`)
   }
 
   async function handleWebsite() {
     if (!website) return
-    recordLead(listingId, 'website')
+    LeadTracker.track({ type: 'website_click', listingId, listingType })
     await Linking.openURL(website)
   }
 

@@ -3,28 +3,49 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as Linking from 'expo-linking'
 import { colors, spacing, fontSize, radius } from '../../lib/tokens'
+import { LeadTracker } from '../../lib/leads'
+import { BRANDING } from '../../constants/branding'
 
 interface PrimaryActionBarProps {
+  listingId: string
+  listingType: 'coaching' | 'hostel'
   isFavorited: boolean
   onFavoritePress: () => void
-  onCallPress?: () => void
-  onSharePress?: () => void
-  area: string | null
   name: string
+  area: string | null
+  phone: string | null
+  whatsapp: string | null
 }
 
 export const PrimaryActionBar = React.memo(function PrimaryActionBarComponent({
+  listingId,
+  listingType,
   isFavorited,
   onFavoritePress,
-  onCallPress,
-  onSharePress,
-  area,
   name,
+  area,
+  phone,
+  whatsapp,
 }: PrimaryActionBarProps) {
   const insets = useSafeAreaInsets()
 
+  async function handleCall() {
+    if (!phone) return
+    LeadTracker.track({ type: 'call_click', listingId, listingType })
+    await Linking.openURL(`tel:${phone}`)
+  }
+
+  async function handleWhatsApp() {
+    if (!whatsapp) return
+    LeadTracker.track({ type: 'whatsapp_click', listingId, listingType })
+    const number = whatsapp.replace(/[^0-9]/g, '')
+    const message = encodeURIComponent(`Hi, I found your institute on ${BRANDING.name} and would like to know more about admissions.`)
+    await Linking.openURL(`https://wa.me/${number}?text=${message}`)
+  }
+
   function handleDirections() {
     if (!area) return
+    LeadTracker.track({ type: 'direction_click', listingId, listingType })
     const query = encodeURIComponent(`${name}, ${area}`)
     Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${query}`)
   }
@@ -44,32 +65,33 @@ export const PrimaryActionBar = React.memo(function PrimaryActionBarComponent({
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, styles.primaryButton]}
-          onPress={onCallPress}
+          style={[styles.button, styles.primaryButton, !phone && styles.disabledButton]}
+          onPress={handleCall}
           activeOpacity={0.85}
-          disabled={!onCallPress}
+          disabled={!phone}
         >
           <Text style={styles.buttonEmoji}>📞</Text>
           <Text style={styles.buttonText}>Call</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, styles.secondaryButton]}
+          style={[styles.button, styles.whatsappButton, !whatsapp && styles.disabledButton]}
+          onPress={handleWhatsApp}
+          activeOpacity={0.85}
+          disabled={!whatsapp}
+        >
+          <Text style={styles.buttonEmoji}>💬</Text>
+          <Text style={styles.buttonText}>WhatsApp</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.iconButton]}
           onPress={handleDirections}
           activeOpacity={0.85}
           disabled={!area}
         >
           <Text style={styles.buttonEmoji}>📍</Text>
           <Text style={styles.buttonText}>Directions</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.iconButton]}
-          onPress={onSharePress}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.buttonEmoji}>↗️</Text>
-          <Text style={styles.buttonText}>Share</Text>
         </TouchableOpacity>
 
       </View>
@@ -109,18 +131,19 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     backgroundColor: colors.violet,
-    flex: 1.2, // Give slightly more room to primary action
+    flex: 1.2,
   },
-  secondaryButton: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+  whatsappButton: {
+    backgroundColor: '#25D366',
     flex: 1.2,
   },
   iconButton: {
     flexDirection: 'column',
     gap: 2,
     backgroundColor: 'transparent',
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
   buttonEmoji: {
     fontSize: 16,
